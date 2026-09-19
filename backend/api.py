@@ -13,8 +13,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pathlib import Path
 
+import time
 from backend.config import settings
 from backend.database.raw_seed import RAW_USERS, RAW_OPPORTUNITIES
+from backend.database.db import get_all_synthesized_profiles, log_audit, get_audit_logs
 from backend.engine.synthesis import synthesizer
 from backend.engine.graph_store import graph_store
 from backend.engine.matchmaker import GraphMatchmaker
@@ -47,6 +49,13 @@ def serve_command_center():
     if index_file.exists():
         return FileResponse(str(index_file))
     return {"status": "AETHER Command Center Online"}
+
+@app.get("/login")
+def serve_login():
+    login_file = static_dir / "login.html"
+    if login_file.exists():
+        return FileResponse(str(login_file))
+    return FileResponse(str(static_dir / "index.html"))
 
 # CORS configuration for Next.js frontend
 app.add_middleware(
@@ -96,18 +105,21 @@ def get_current_user(token: Optional[str] = Query(None)):
             return {"authenticated": True, "user": acc, "email": email}
     return {"authenticated": False, "role": "guest"}
 
-# Global synthesized cache & matchmaker initialized immediately
-SYNTHESIZED_PROFILES: List[Dict[str, Any]] = [synthesizer.synthesize_user_context(u) for u in RAW_USERS]
+# Global synthesized cache & matchmaker initialized immediately from SQLite persistent DB
+SYNTHESIZED_PROFILES: List[Dict[str, Any]] = get_all_synthesized_profiles()
+if not SYNTHESIZED_PROFILES:
+    SYNTHESIZED_PROFILES = [synthesizer.synthesize_user_context(u) for u in RAW_USERS]
 graph_store.build_graph_from_profiles(SYNTHESIZED_PROFILES)
 matchmaker: GraphMatchmaker = GraphMatchmaker(SYNTHESIZED_PROFILES)
 
 @app.on_event("startup")
 async def startup_event():
     global SYNTHESIZED_PROFILES, matchmaker
+    SYNTHESIZED_PROFILES = get_all_synthesized_profiles()
     if not SYNTHESIZED_PROFILES:
         SYNTHESIZED_PROFILES = [synthesizer.synthesize_user_context(u) for u in RAW_USERS]
-        graph_store.build_graph_from_profiles(SYNTHESIZED_PROFILES)
-        matchmaker = GraphMatchmaker(SYNTHESIZED_PROFILES)
+    graph_store.build_graph_from_profiles(SYNTHESIZED_PROFILES)
+    matchmaker = GraphMatchmaker(SYNTHESIZED_PROFILES)
 
 @app.get("/api/health")
 def health_check():
@@ -167,6 +179,7 @@ async def query_agent(req: AgentQueryRequest):
     Conversational AI agent letting organizers ask open-ended questions
     about any user and receive a synthesized answer.
     """
+    start_t = time.time()
     q = req.query.lower()
 
     # 1. Existence check detection
@@ -180,6 +193,8 @@ async def query_agent(req: AgentQueryRequest):
                 if live_news:
                     narrative += f"\n\nLive External Signal (via Tavily): {live_news[:180]}..."
                 
+                latency_ms = round((time.time() - start_t) * 1000, 2)
+                log_audit(req.query, u["username"], True, latency_ms)
                 return {
                     "query": req.query,
                     "exists": True,
@@ -188,7 +203,8 @@ async def query_agent(req: AgentQueryRequest):
                         f"Yes, {u['name']} (@{u['username']}) is in our database.\n\n"
                         f"{narrative}"
                     ),
-                    "profile": u
+                    "profile": u,
+                    "latency_ms": latency_ms
                 }
 
     # 2. Targeted user query
@@ -217,17 +233,27 @@ async def query_agent(req: AgentQueryRequest):
         else:
             ans = target["synthesized_narrative"]
 
+        # Enrich with live Tavily ground if relevant
+        tavily_ground = await synthesizer.live_ground_with_tavily(f"{target['name']} {target['primary_domain']}")
+        if tavily_ground:
+            ans += f"\n\nLive Market Verification (via Tavily): {tavily_ground[:220]}..."
+
+        latency_ms = round((time.time() - start_t) * 1000, 2)
+        log_audit(req.query, target["username"], True, latency_ms)
         return {
             "query": req.query,
             "exists": True,
             "target_user": target["username"],
             "synthesized_response": ans,
-            "profile": target
+            "profile": target,
+            "latency_ms": latency_ms
         }
 
     # 3. Best candidate / open search query
     if "frontend" in q or "design" in q or "ui" in q:
         candidate = next((u for u in SYNTHESIZED_PROFILES if "Frontend" in u["archetype"]), SYNTHESIZED_PROFILES[0])
+        latency_ms = round((time.time() - start_t) * 1000, 2)
+        log_audit(req.query, candidate["username"], True, latency_ms)
         return {
             "query": req.query,
             "exists": True,
@@ -236,11 +262,14 @@ async def query_agent(req: AgentQueryRequest):
                 f"Top recommendation for Frontend & Design Craftsmanship is {candidate['name']} (@{candidate['username']}).\n\n"
                 f"{candidate['synthesized_narrative']}"
             ),
-            "profile": candidate
+            "profile": candidate,
+            "latency_ms": latency_ms
         }
 
     if "system" in q or "backend" in q or "distributed" in q or "memory" in q or "database" in q:
         candidate = next((u for u in SYNTHESIZED_PROFILES if "Systems" in u["archetype"]), SYNTHESIZED_PROFILES[1])
+        latency_ms = round((time.time() - start_t) * 1000, 2)
+        log_audit(req.query, candidate["username"], True, latency_ms)
         return {
             "query": req.query,
             "exists": True,
@@ -249,20 +278,42 @@ async def query_agent(req: AgentQueryRequest):
                 f"Top recommendation for Low-Level Systems & Distributed Architecture is {candidate['name']} (@{candidate['username']}).\n\n"
                 f"{candidate['synthesized_narrative']}"
             ),
-            "profile": candidate
+            "profile": candidate,
+            "latency_ms": latency_ms
         }
 
     # Default overview
+    latency_ms = round((time.time() - start_t) * 1000, 2)
+    log_audit(req.query, None, True, latency_ms)
     return {
         "query": req.query,
         "exists": True,
         "target_user": None,
         "synthesized_response": (
-            f"AETHER Context Layer is indexing {len(SYNTHESIZED_PROFILES)} verified platform users. "
-            f"You can ask existence checks (e.g. 'Is Shiv in our database?') or evaluate technical alignment, "
-            f"velocity, and complementary team matchmaking."
+            f"AETHER Context Layer is indexing {len(SYNTHESIZED_PROFILES)} verified platform users from persistent SQLite store and live Neo4j Aura graph. "
+            f"You can ask existence checks (e.g. 'Is Shiv in our database?'), evaluate engineering velocity, or assemble complementary hackathon squads."
         ),
-        "profile": None
+        "profile": None,
+        "latency_ms": latency_ms
+    }
+
+@app.get("/api/audit/logs")
+def fetch_audit_logs(limit: int = Query(50, ge=1, le=200)):
+    """Returns persistent audit log history from SQLite database."""
+    return {"audit_logs": get_audit_logs(limit=limit)}
+
+class CypherQueryRequest(BaseModel):
+    query: str
+
+@app.post("/api/graph/cypher")
+def run_live_cypher(req: CypherQueryRequest):
+    """Executes live Cypher query directly on connected Neo4j Aura instance."""
+    results = graph_store.run_cypher(req.query)
+    return {
+        "cypher": req.query,
+        "neo4j_connected": graph_store.neo4j_connected,
+        "results": results,
+        "count": len(results)
     }
 
 @app.get("/api/graph/topology")

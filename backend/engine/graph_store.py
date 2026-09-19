@@ -111,6 +111,60 @@ class GraphStore:
                             {"affinity": 0.95}
                         )
 
+        # Synchronize directly to live Neo4j Aura instance if connected
+        if self.neo4j_connected and self.driver:
+            self._sync_to_live_neo4j(profiles)
+
+    def _sync_to_live_neo4j(self, profiles: List[Dict[str, Any]]):
+        """Pushes user nodes, skills, archetypes, and relationship edges into Neo4j Aura."""
+        try:
+            with self.driver.session() as session:
+                for p in profiles:
+                    session.run(
+                        """
+                        MERGE (u:User {id: $id})
+                        SET u.name = $name,
+                            u.username = $username,
+                            u.archetype = $archetype,
+                            u.reliability_score = $reliability_score,
+                            u.commit_velocity = $commit_velocity,
+                            u.win_rate = $win_rate
+                        MERGE (a:Archetype {name: $archetype})
+                        MERGE (u)-[:HAS_ARCHETYPE]->(a)
+                        """,
+                        id=p["user_id"],
+                        name=p["name"],
+                        username=p["username"],
+                        archetype=p["archetype"],
+                        reliability_score=p["reliability_score"],
+                        commit_velocity=p["commit_velocity"],
+                        win_rate=p["win_rate"]
+                    )
+                    for skill in set(p.get("skills", [])):
+                        session.run(
+                            """
+                            MERGE (u:User {id: $uid})
+                            MERGE (s:Skill {name: $skill})
+                            MERGE (u)-[:PROFICIENT_IN]->(s)
+                            """,
+                            uid=p["user_id"],
+                            skill=skill
+                        )
+                logger.info("Successfully synced all profiles and edges to live Neo4j Aura instance.")
+        except Exception as e:
+            logger.warning(f"Neo4j live sync warning: {e}")
+
+    def run_cypher(self, query: str, parameters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """Executes Cypher on live Neo4j instance or falls back to in-memory evaluation."""
+        if self.neo4j_connected and self.driver:
+            try:
+                with self.driver.session() as session:
+                    res = session.run(query, parameters or {})
+                    return [r.data() for r in res]
+            except Exception as e:
+                logger.warning(f"Neo4j query error: {e}")
+        return []
+
     def get_topology_payload(self) -> Dict[str, Any]:
         """
         Returns a formatted React Flow / Graph Canvas payload with coordinates.

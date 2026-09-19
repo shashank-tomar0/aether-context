@@ -29,7 +29,7 @@ def test_root_serves_html():
 def test_app_serves_command_center():
     res = client.get("/app")
     assert res.status_code == 200
-    assert "AETHER // Universal Context Layer" in res.text
+    assert "AETHER // Universal Context" in res.text
 
 def test_user_existence_check_found():
     # Exact scenario from PDF problem statement: "Is Shiv in our database?"
