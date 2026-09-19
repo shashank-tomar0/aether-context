@@ -1,0 +1,488 @@
+Metadata-Version: 2.4
+Name: aether-context
+Version: 1.0.0
+Summary: AETHER: Universal Cognitive Context Layer and Autonomous Graph Matchmaker
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi>=0.110.0
+Requires-Dist: uvicorn>=0.28.0
+Requires-Dist: pydantic>=2.6.0
+Requires-Dist: neo4j>=5.18.0
+Requires-Dist: httpx>=0.27.0
+Requires-Dist: rich>=13.7.0
+
+# AETHER: Universal Cognitive Context Layer and Graph Matchmaker
+
+A high-performance universal context layer designed for hackathon ecosystems and developer platforms. AETHER ingests disparate, heterogeneous developer activity streams—internal commit velocities, hackathon submissions, peer reviews, and external digital footprints (GitHub, LinkedIn)—synthesizing them into deterministic cognitive archetypes, multi-factor reliability ratings, and a living relational knowledge graph. 
+
+The context layer exposes these synthesized states through a bi-directional WebSocket stream, a live Cypher graph console, an autonomous squad matchmaking engine, a conversational intelligence agent, external integrations (Slack Block Kit and Telegram), and a terminal user interface (TUI).
+
+---
+
+## 1. System Architecture
+
+```mermaid
+flowchart TD
+    subgraph Ingestion ["1. Multimodal Data Ingestion Layer"]
+        CSV["Dataset Ingestor (656 Real Hackathon Participants)"]
+        GitHubWebhook["GitHub Webhook Ingestor (Push, Commit, PR Events)"]
+        ExternalFootprint["External Footprint Parser (GitHub Repositories, LinkedIn)"]
+        PlatformDB[("SQLite Persistent Store (Users, Activities, Projects, Audit Logs)")]
+        
+        CSV --> PlatformDB
+        GitHubWebhook --> PlatformDB
+        ExternalFootprint --> PlatformDB
+    end
+
+    subgraph Cognitive ["2. Cognitive Synthesis and Live Sensor Layer"]
+        Synthesizer["Deterministic Context Synthesizer Engine"]
+        Tavily["Tavily AI Web Sensor (Live Real-Time Market Grounding)"]
+        Gemini["Google Gemini 2.5 Flash (Cognitive Narrative Reasoning)"]
+        
+        PlatformDB --> Synthesizer
+        Synthesizer <--> Tavily
+        Synthesizer <--> Gemini
+        Synthesizer --> Archetypes["4D Developer Archetypes & Reliability Scores"]
+    end
+
+    subgraph Topology ["3. Neo4j Knowledge Graph and Matchmaking Engine"]
+        Neo4j[("Neo4j Aura Cloud Instance")]
+        Matchmaker["Autonomous Graph Matchmaking Engine"]
+        CypherConsole["Direct Cypher Execution Console"]
+        
+        Archetypes --> Neo4j
+        Neo4j --> Matchmaker
+        Neo4j --> CypherConsole
+    end
+
+    subgraph Delivery ["4. Dual-Surface Delivery Layer"]
+        FastAPI["FastAPI High-Throughput Gateway"]
+        WebLanding["Landing Page (Warm Aesthetic, Performance Optimized)"]
+        CommandCenter["Command Center (Obsidian Architecture, 7 Reactive Tabs)"]
+        TerminalCLI["Claude-Grade Terminal TUI / CLI"]
+        BotIntegrations["Telegram Webhook and Slack Block Kit Bots"]
+        WebSocketStream["WebSocket Telemetry Stream (/ws/graph)"]
+
+        Matchmaker --> FastAPI
+        FastAPI --> WebLanding
+        FastAPI --> CommandCenter
+        FastAPI --> TerminalCLI
+        FastAPI --> BotIntegrations
+        FastAPI --> WebSocketStream
+    end
+```
+
+---
+
+## 2. Ingestion and Synthesis Pipeline
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Developer as Developer / Participant
+    participant Ingestion as Ingestion Engine
+    participant SQLite as SQLite Database (aether.db)
+    participant Sensor as Tavily Sensor
+    participant LLM as Gemini 2.5 Flash
+    participant Graph as Neo4j Aura Cloud
+    participant Client as Web / CLI / Integrations
+
+    Developer->>Ingestion: Emit Event (CSV Row / GitHub Push Webhook)
+    Ingestion->>SQLite: Persist Raw Record (Normalized Schema)
+    Ingestion->>Sensor: Fetch Live Grounding Context
+    Sensor-->>Ingestion: External Repository / Activity Signals
+    Ingestion->>LLM: Perform Semantic Context Synthesis
+    LLM-->>Ingestion: Executive Narrative and Complementary Profiling
+    Ingestion->>SQLite: Store Synthesized Context and Audit Log
+    Ingestion->>Graph: Upsert Nodes (User, Archetype, Skill, Project) and Edges
+    Graph-->>Client: Stream Live Graph Delta via WebSocket (/ws/graph)
+```
+
+---
+
+## 3. Mathematical Formulations
+
+AETHER avoids simplistic keyword matching in favor of deterministic mathematical models governing talent evaluation, execution reliability, and squad matchmaking synergy.
+
+### 3.1 Execution Reliability Formulation
+
+The Execution Reliability Index ($R_i \in [0, 100]$) assesses historical follow-through and operational consistency:
+
+$$
+R_i = \min\left(100, \; \alpha \cdot V_i + \beta \cdot (1.0 - F_i) \cdot 100 + \gamma \cdot W_i \cdot 100 + \delta \cdot \bar{P}_i \cdot 20\right)
+$$
+
+Where:
+- $V_i$: Normalized commit velocity percentile ($V_i \in [0, 100]$).
+- $F_i$: Historical flake or abandonment rate ($F_i \in [0, 1.0]$).
+- $W_i$: Hackathon win ratio ($\frac{\text{Wins}}{\text{Participated}}$).
+- $\bar{P}_i$: Mean peer review score ($\bar{P}_i \in [1.0, 5.0]$).
+- Default calibration weights: $\alpha = 0.40$, $\beta = 0.30$, $\gamma = 0.15$, $\delta = 0.15$ such that $\alpha + \beta + \gamma + \delta = 1.0$.
+
+### 3.2 Exponential Recency Velocity Decay
+
+To prioritize sustained recent activity over legacy contributions, commit activity is weighted via an exponential decay model:
+
+$$
+V_{\text{weighted}} = \sum_{k=1}^{M} c_k \cdot e^{-\lambda (t_0 - t_k)}
+$$
+
+Where $c_k$ is the contribution volume at timestamp $t_k$, $t_0$ is the evaluation epoch, and $\lambda$ is the half-life decay parameter set to $\lambda = \frac{\ln(2)}{90 \text{ days}}$.
+
+### 3.3 Autonomous Squad Matchmaking Synergy Index
+
+Traditional recommendation systems group developers with overlapping skillsets, creating redundancy. AETHER computes the Composite Orthogonal Synergy Index ($S(C)$) across candidate set $C$ of cardinality $N$:
+
+$$
+S(C) = w_1 \cdot D(C) + w_2 \cdot \bar{R}(C) + w_3 \cdot \Phi(C)
+$$
+
+Component Definitions:
+
+1. **Archetype Diversity Factor ($D(C)$)**:
+   Measures structural balance across distinct technical roles (e.g., Systems Architect, Frontend Craftsperson, AI Specialist):
+
+   $$
+   D(C) = \left( \frac{| \{ \text{Archetype}(u) \mid u \in C \} |}{N} \right) \times 100
+   $$
+
+2. **Mean Candidate Reliability ($\bar{R}(C)$)**:
+   Ensures the team meets minimum execution guarantees:
+
+   $$
+   \bar{R}(C) = \frac{1}{N} \sum_{u \in C} R_u
+   $$
+
+3. **Graph Relational Affinity ($\Phi(C)$)**:
+   Aggregates complementary edges from the Neo4j relational graph:
+
+   $$
+   \Phi(C) = \min\left( 30, \; \sum_{u, v \in C, \, u \neq v} \left( \mathbb{I}_{u \to v}^{\text{COMPLEMENTS}} \cdot \omega_{uv} + \mathbb{I}_{v \to u}^{\text{COMPLEMENTS}} \cdot \omega_{vu} \right) \right)
+   $$
+
+   Where $\mathbb{I}^{\text{COMPLEMENTS}}$ is the edge indicator function and $\omega$ is the edge weight.
+
+Model weights: $w_1 = 0.35$, $w_2 = 0.35$, $w_3 = 1.0$, producing a standardized score normalized between $0$ and $100$.
+
+---
+
+## 4. Sponsor Technology Utilization
+
+| Technology | Sponsor Role | Architectural Function within AETHER |
+| :--- | :--- | :--- |
+| **Neo4j Aura Cloud** | Graph Database Sponsor | Live cloud instance (`neo4j+s://b6c72f14.databases.neo4j.io`). Persists relational topology of `User`, `Archetype`, `Skill`, and `Project` nodes. Powers the interactive 60fps graph canvas, bidirectional `COMPLEMENTS` traversals, and live Cypher execution (`POST /api/graph/cypher`). |
+| **Tavily AI** | Search and Sensor Sponsor | Live Web Sensor API (`tvly-dev-...`). On every conversational inquiry or candidate verification, Tavily executes dynamic external web grounding against real-world GitHub repositories, preventing hallucination. |
+| **Google Gemini 2.5 Flash** | Cognitive Reasoning Sponsor | High-velocity cognitive intelligence model (`models/gemini-2.5-flash`). Translates quantitative telemetry, commit metrics, and archetype tags into executive talent summaries and pairing analyses. |
+| **SQLite (WAL Mode)** | Persistent Embedded Storage | High-concurrency zero-latency ACID database (`backend/database/aether.db`). Persists 661 verified hackathon participant profiles, normalized external tables, opportunity mappings, and real-time audit trails with measured millisecond latencies. |
+
+---
+
+## 5. Technology Stack
+
+### Backend
+- **Language**: Python 3.13
+- **Web Framework**: FastAPI (Asynchronous ASGI)
+- **Database**: SQLite (WAL mode, Foreign Keys enabled)
+- **Graph Database**: Neo4j Aura Cloud (Bolt protocol over TLS)
+- **External Sensors**: Tavily AI Search API
+- **Reasoning Models**: Google Gemini 2.5 Flash
+- **WebSockets**: Native ASGI WebSockets for real-time telemetry broadcast
+
+### Frontend
+- **Command Center**: Vanilla JavaScript (ES6+), TailwindCSS, HTML5 Canvas Graph Visualizer
+- **Landing Page**: Tailored typography (Plus Jakarta Sans, JetBrains Mono), Responsive 1px border architecture, Zero-overflow CSS layout
+- **Styling Architecture**: Obsidian palette (`#09090b`, `#121216`, `#18181f`), Refero-grade aesthetic polish
+
+### Terminal Interface (CLI / TUI)
+- **Engine**: Python `rich` library
+- **Surfaces**: Command mode (`check`, `ask`, `match`, `users`, `cypher`, `audit`) and Interactive REPL Shell mode (`python cli/aether.py tui`)
+
+---
+
+## 6. End-to-End API Specification
+
+### 6.1 Existence Verification
+Verify whether a given participant exists in the registry.
+
+```http
+GET /api/users/check?q=Shiv
+```
+
+**Response (`200 OK`)**:
+```json
+{
+  "exists": true,
+  "query": "Shiv",
+  "user": {
+    "user_id": "usr_001",
+    "username": "shiv_dev",
+    "name": "Shiv Sharma",
+    "email": "shiv@nexus.dev",
+    "archetype": "High-Velocity Systems Architect",
+    "reliability_score": 96.4,
+    "commit_velocity": 94,
+    "win_rate": 33.3,
+    "primary_domain": "Low-Level Systems, Distributed Consensus & Graph Engines"
+  },
+  "message": "Verified: Shiv Sharma (@shiv_dev) is active in the user base."
+}
+```
+
+### 6.2 Conversational Cognitive Query
+Perform semantic context synthesis with live Tavily web grounding and Gemini 2.5 Flash narrative reasoning.
+
+```http
+POST /api/agent/query
+Content-Type: application/json
+
+{
+  "query": "Is Shiv in our database? What has he built?"
+}
+```
+
+### 6.3 Autonomous Squad Matchmaking
+Form an orthogonal squad balancing systems, frontend, and AI skillsets.
+
+```http
+POST /api/matchmaking/squad
+Content-Type: application/json
+
+{
+  "target_goal": "AI Systems & Web3",
+  "squad_size": 3
+}
+```
+
+**Response (`200 OK`)**:
+```json
+{
+  "target_goal": "AI Systems & Web3",
+  "squad_size": 3,
+  "synergy_score": 99.6,
+  "squad_members": [
+    {
+      "user_id": "part_001",
+      "name": "Shashank Tomar",
+      "assigned_role": "Lead Architect & Systems Core",
+      "archetype": "High-Velocity Systems Architect",
+      "reliability_score": 98.8
+    },
+    {
+      "user_id": "part_002",
+      "name": "Ankit Gupta",
+      "assigned_role": "Frontend & Interaction Craftsperson",
+      "archetype": "Elite Frontend & Motion Craftsperson",
+      "reliability_score": 98.8
+    },
+    {
+      "user_id": "part_003",
+      "name": "Mani Pal",
+      "assigned_role": "Product Strategist & GTM Lead",
+      "archetype": "Product Strategist & Market Architect",
+      "reliability_score": 98.8
+    }
+  ],
+  "architectural_rationale": "Assembled a high-alignment 3-person squad achieving a 99.6% mathematical synergy rating."
+}
+```
+
+### 6.4 Live Cypher Console
+Execute queries directly against connected Neo4j Aura Cloud graph.
+
+```http
+POST /api/graph/cypher
+Content-Type: application/json
+
+{
+  "query": "MATCH (u:User)-[:HAS_ARCHETYPE]->(a:Archetype) RETURN u.name, a.name LIMIT 5"
+}
+```
+
+### 6.5 External Bot Webhook Endpoints
+- `POST /api/integrations/telegram/webhook`: Formats and delivers Telegram markdown profile cards.
+- `GET /api/integrations/telegram/simulate?q=shiv_dev`: Telegram command testing simulator.
+- `POST /api/integrations/slack/webhook`: Returns official Slack Block Kit JSON payloads.
+- `GET /api/integrations/slack/simulate?q=shiv_dev`: Slack command testing simulator.
+- `POST /webhooks/github`: Receives live commit and PR webhooks, indexing activity and broadcasting via WebSocket.
+
+---
+
+## 7. Local Installation and Verification
+
+### Prerequisites
+- Python 3.10 to 3.13
+- Git
+
+### Installation Steps
+
+```bash
+# 1. Clone repository
+git clone https://github.com/shashank-tomar0/aether-context.git
+cd aether-context
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Verify environment configuration (.env)
+# Required variables:
+# NEO4J_URI=neo4j+s://b6c72f14.databases.neo4j.io
+# NEO4J_USERNAME=b6c72f14
+# NEO4J_PASSWORD=jHFLa1yPuYoNtZHTFFv-sZCuag1mhl1fTQdTvxHXyQ4
+# TAVILY_API_KEY=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
+# GEMINI_API_KEY=AIzaSy...
+```
+
+### Running Automated Test Suite
+
+```bash
+pytest tests/test_api.py -v
+```
+All 12 automated unit and integration tests execute and pass deterministically.
+
+### Starting Application Locally
+
+```bash
+uvicorn backend.api:app --host 127.0.0.1 --port 8000
+```
+
+Local access points:
+- **Landing Page**: `http://127.0.0.1:8000/`
+- **Command Center**: `http://127.0.0.1:8000/app`
+- **Role Authentication**: `http://127.0.0.1:8000/login`
+- **Interactive OpenAPI Documentation**: `http://127.0.0.1:8000/docs`
+
+---
+
+## 8. CLI Usage Guide
+
+AETHER provides a complete terminal interface matching the capabilities of the Web Command Center:
+
+```bash
+# Verify participant existence (exact token or substring matching)
+python cli/aether.py check Shiv
+
+# Query any of the 656 real dataset participants
+python cli/aether.py check scriptedbyshivam
+
+# Natural language conversational context query
+python cli/aether.py ask "Who is our best frontend engineer with high design taste?"
+
+# Squad assembly with synergy score output
+python cli/aether.py match --goal "AI Systems & Web3" --size 3
+
+# Display paginated table of indexed platform users
+python cli/aether.py users
+
+# Execute live Cypher query against Neo4j Aura Cloud
+python cli/aether.py cypher "MATCH (u:User) RETURN u.name, u.archetype LIMIT 5"
+
+# Inspect persistent SQLite audit logs
+python cli/aether.py audit
+
+# Launch interactive Claude-grade TUI REPL
+python cli/aether.py tui
+```
+
+---
+
+## 9. Production Deployment Guide
+
+AETHER is designed as a unified single-container application serving API endpoints, WebSockets, background threads, and static client assets simultaneously.
+
+### 9.1 Render Deployment (Recommended)
+
+1. Create a **Web Service** on [Render](https://render.com).
+2. Connect the GitHub repository `shashank-tomar0/aether-context`.
+3. Configure the service settings:
+   - **Environment**: `Python`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn backend.api:app --host 0.0.0.0 --port $PORT`
+4. Set Environment Variables under the **Environment** tab:
+   - `NEO4J_URI`: `neo4j+s://b6c72f14.databases.neo4j.io`
+   - `NEO4J_USERNAME`: `b6c72f14`
+   - `NEO4J_PASSWORD`: `<your-neo4j-password>`
+   - `TAVILY_API_KEY`: `<your-tavily-api-key>`
+   - `GEMINI_API_KEY`: `<your-gemini-api-key>`
+   - `PORT`: `8000`
+5. Trigger manual or automated deploy.
+
+### 9.2 Docker Deployment
+
+A standard `Dockerfile` can package the entire runtime:
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 8000
+CMD ["uvicorn", "backend.api:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+Build and execute container:
+```bash
+docker build -t aether-context .
+docker run -p 8000:8000 --env-file .env aether-context
+```
+
+### 9.3 CLI Client Distribution
+
+The CLI operates remotely against any deployed instance by specifying the server target or querying local SQLite and cloud Neo4j directly:
+
+```bash
+# Directly executable on any terminal with Python 3.10+
+pip install rich requests
+python cli/aether.py --help
+```
+
+---
+
+## 10. Complete Demonstration Flow
+
+For live evaluation and competition judging, follow this sequential demonstration script:
+
+1. **Step 1: System Baseline & Connectivity**
+   - Open `http://127.0.0.1:8000/api/health`.
+   - Confirm `status: "healthy"`, `neo4j_connected: true`, and `users_indexed: 661`.
+
+2. **Step 2: Platform Landing Page**
+   - Navigate to `http://127.0.0.1:8000/`.
+   - Demonstrate the warm minimalist design, live participant metric badge (661 verified builders), 4-tier architectural breakdown, and interactive query preview card.
+
+3. **Step 3: Role-Based Authentication**
+   - Click **Access Command Center** or navigate to `http://127.0.0.1:8000/login`.
+   - Authenticate as Organizer (`admin@nexus.dev` / `admin123`).
+   - Observe immediate role assignment and persistent token storage.
+
+4. **Step 4: Conversational Context Agent**
+   - Under Tab 1 (Conversational Agent), submit: `"Is Shiv in our database? What has he built?"`.
+   - Observe sub-millisecond local resolution coupled with live external Tavily verification and Gemini 2.5 Flash narrative generation.
+
+5. **Step 5: Relational Knowledge Graph**
+   - Switch to Tab 2 (Relational Graph).
+   - Interact with the live 60fps force-directed canvas displaying users, archetypes, skills, and complementary edges.
+
+6. **Step 6: Autonomous Squad Matchmaker**
+   - Switch to Tab 3 (Squad Matchmaker).
+   - Request an assembly for `"AI Systems & Web3"` with team size 3.
+   - Observe the computed orthogonal lineup (`Shashank Tomar`, `Ankit Gupta`, `Mani Pal`), synergy score (99.6%), and mathematical breakdown.
+
+7. **Step 7: Live Neo4j Cypher Console**
+   - Switch to Tab 4 (Live Cypher).
+   - Execute: `MATCH (u:User) RETURN u.name, u.archetype LIMIT 10`.
+   - Verify direct real-time communication with the cloud Neo4j database.
+
+8. **Step 8: Bot Integrations and GitHub Webhooks**
+   - Switch to Tab 5 (Telegram & Slack) and Tab 6 (GitHub Webhook).
+   - Test the Telegram simulation to view markdown cards and the Slack simulation to inspect official Block Kit JSON.
+   - Trigger a simulated GitHub push to observe live commit indexing and WebSocket graph broadcast.
+
+9. **Step 9: Terminal CLI Demonstration**
+   - Open terminal and execute `python cli/aether.py check Shiv`.
+   - Execute `python cli/aether.py match --goal "Distributed Systems" --size 3`.
+   - Launch `python cli/aether.py tui` to demonstrate the interactive terminal shell.
+
