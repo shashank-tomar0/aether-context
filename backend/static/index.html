@@ -96,9 +96,20 @@
       <button onclick="switchTab('diff')" id="tab-diff" class="tab-btn px-3 py-1 rounded-md text-slate-400 hover:text-white transition">Raw vs Synthesized</button>
     </nav>
 
-    <!-- LIVE TELEMETRY CHIP -->
+    <!-- LIVE TELEMETRY CHIP & AUTH SESSION -->
     <div class="flex items-center space-x-3 text-xs font-mono">
       <span class="text-slate-400 hidden lg:inline">subdomain: <span class="text-white font-semibold">shashanktomar.dev</span></span>
+      
+      <!-- AUTH ROLE SWITCHER -->
+      <div class="flex items-center space-x-1.5 bg-obsidian-850 px-2.5 py-1 rounded-lg border border-subtle">
+        <span class="text-[10px] text-slate-500 uppercase">Role:</span>
+        <select id="auth-role-select" onchange="switchAuthRole(this.value)" class="bg-transparent text-cyan-400 font-semibold focus:outline-none cursor-pointer">
+          <option value="organizer" class="bg-obsidian-900 text-white">Organizer (Alex Vance)</option>
+          <option value="builder" class="bg-obsidian-900 text-white">Builder (Shiv Sharma)</option>
+          <option value="guest" class="bg-obsidian-900 text-white">Guest (Public View)</option>
+        </select>
+      </div>
+
       <div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px]">
         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
         <span>PRODUCTION ACTIVE</span>
@@ -641,6 +652,17 @@
       });
 
       requestAnimationFrame(renderGraphLoop);
+    }
+
+    function switchAuthRole(role) {
+      if (role === 'builder') {
+        selectUser('shiv_dev');
+        alert("Switched to Builder Persona: Viewing Shiv Sharma's cognitive profile & complementary team matches.");
+      } else if (role === 'organizer') {
+        alert("Switched to Organizer Persona: Full administrative omni-query, squad generator, and grant dispatcher active.");
+      } else {
+        alert("Switched to Public Guest View.");
+      }
     }
 
     // Startup

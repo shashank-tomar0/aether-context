@@ -57,6 +57,45 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Authentication Layer (Demo & Production Roles)
+DEMO_ACCOUNTS = {
+    "admin@nexus.dev": {
+        "password": "admin123",
+        "name": "Alex Vance (Hackathon Organizer)",
+        "role": "organizer",
+        "token": "tok_organizer_998124"
+    },
+    "shiv@nexus.dev": {
+        "password": "builder123",
+        "name": "Shiv Sharma",
+        "role": "builder",
+        "token": "tok_builder_112048"
+    }
+}
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+@app.post("/api/auth/login")
+def login(req: LoginRequest):
+    acc = DEMO_ACCOUNTS.get(req.email.lower())
+    if not acc or acc["password"] != req.password:
+        raise HTTPException(status_code=401, detail="Invalid email or password. Use demo credentials.")
+    return {
+        "token": acc["token"],
+        "name": acc["name"],
+        "role": acc["role"],
+        "email": req.email
+    }
+
+@app.get("/api/auth/me")
+def get_current_user(token: Optional[str] = Query(None)):
+    for email, acc in DEMO_ACCOUNTS.items():
+        if acc["token"] == token:
+            return {"authenticated": True, "user": acc, "email": email}
+    return {"authenticated": False, "role": "guest"}
+
 # Global synthesized cache & matchmaker initialized immediately
 SYNTHESIZED_PROFILES: List[Dict[str, Any]] = [synthesizer.synthesize_user_context(u) for u in RAW_USERS]
 graph_store.build_graph_from_profiles(SYNTHESIZED_PROFILES)

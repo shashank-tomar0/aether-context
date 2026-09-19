@@ -78,6 +78,17 @@ def test_matchmaking_squad_assembly():
     assert data["synergy_score"] > 80.0
     assert "architectural_rationale" in data
 
+def test_auth_login_success():
+    res = client.post("/api/auth/login", json={"email": "admin@nexus.dev", "password": "admin123"})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["role"] == "organizer"
+    assert "token" in data
+
+def test_auth_login_failure():
+    res = client.post("/api/auth/login", json={"email": "admin@nexus.dev", "password": "wrongpassword"})
+    assert res.status_code == 401
+
 def test_downstream_opportunities():
     res = client.get("/api/opportunities/match")
     assert res.status_code == 200
@@ -96,5 +107,7 @@ if __name__ == "__main__":
     test_agent_conversational_query_frontend_recommendation()
     test_graph_topology()
     test_matchmaking_squad_assembly()
+    test_auth_login_success()
+    test_auth_login_failure()
     test_downstream_opportunities()
-    print("All 7 tests passed successfully!")
+    print("All 9 integration and auth tests passed successfully!")
