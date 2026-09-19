@@ -6,6 +6,7 @@ Single source of truth for cross-agent memory, architectural contracts, and oper
 
 ## 1. System Identity & Mission
 - **Repository**: `https://github.com/shashank-tomar0/aether-context`
+- **Active Commit**: `7b9747c` (Verified on `main`)
 - **Target Subdomain**: `shashanktomar.dev`
 - **Problem Statement Track**: **PS-3: Universal Context Layer for Platform Users**
 - **Sponsors & Technology Matrix**:
@@ -16,62 +17,74 @@ Single source of truth for cross-agent memory, architectural contracts, and oper
 
 ---
 
-## 2. Active Technical Stack & Directory Layout
-```
-ai-hack/
-├── .agents/skills/              # Installed agent skills (caveman, ponytail, taste-skill, impeccable, context7)
-├── backend/
-│   ├── api.py                   # FastAPI application & REST endpoints
-│   ├── config.py                # Environment configuration
-│   ├── requirements.txt         # Production Python dependencies
-│   ├── database/
-│   │   └── raw_seed.py          # Platform database seed with rich user activity logs & projects
-│   ├── engine/
-│   │   ├── synthesis.py         # Cognee cognitive extraction & 4D profile synthesizer
-│   │   ├── graph_store.py       # Neo4j driver + in-memory topological graph engine
-│   │   └── matchmaker.py        # Graph squad assembly & opportunity allocation algorithms
-│   └── static/
-│       └── index.html           # Refero-grade Web Command Center with 60fps graph canvas
-├── cli/
-│   └── aether.py                # High-velocity terminal client (check, ask, match, users)
-├── tests/
-│   └── test_api.py              # Automated test suite (all 7 tests passing)
-├── Dockerfile                   # Multi-stage production container
-├── render.yaml                  # Infrastructure-as-Code for Render Cloud
-├── ai.md                        # Context preservation & handoff document
-└── README.md                    # Production documentation (no emojis, complete specs)
+## 2. Dual-Surface Architecture & Routes
+- **Route `/`**: Pixel-perfect cloned Cofounder landing page (`https://cofounder.co/`) transformed with absolute typography, glassmorphism, and AETHER Context Layer copy.
+- **Route `/app` & `/command-center`**: Refero-grade Obsidian Command Center (`#060709`) featuring:
+  - 60fps HTML5 Canvas interactive graph with physics and draggable nodes.
+  - Conversational query drawer with instant existence checks (`[VERIFIED EXISTENCE]`).
+  - Autonomous Squad Matchmaker with mathematical synergy score calculation.
+  - Downstream Opportunity & Bounty Dispatcher.
+  - Raw Database vs. Synthesized Context Diff Inspector.
+  - Role-based Authentication Switcher (Organizer vs. Builder vs. Guest).
+- **Route `/api/*`**: FastAPI REST API endpoints.
+
+---
+
+## 3. Demo Credentials
+- **Organizer Admin**: `admin@nexus.dev` / `admin123` (Role: `organizer`, Token: `tok_organizer_998124`)
+- **Builder Candidate**: `shiv@nexus.dev` / `builder123` (Role: `builder`, Token: `tok_builder_112048`)
+
+---
+
+## 4. API Keys & Production Environment Variables
+The application runs with a zero-failure resilient architecture: if external keys are not provided, it utilizes built-in cognitive heuristics and an in-memory topological graph engine. To activate full cloud sponsor integrations:
+
+```env
+# Port & Host
+PORT=8000
+HOST=0.0.0.0
+
+# Tavily Real-Time Grounding (tavily.com)
+TAVILY_API_KEY=tvly-xxxxxxxxxxxxxxxxxxxx
+
+# Neo4j Aura Graph Database (neo4j.com/cloud/aura)
+NEO4J_URI=neo4j+s://xxxxxxxx.databases.neo4j.io
+NEO4J_USERNAME=neo4j
+NEO4J_PASSWORD=xxxxxxxxxxxxxxxx
+
+# LLM Providers for Cognee
+OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxx
+GEMINI_API_KEY=AIzaxxxxxxxxxxxxxxxxxxxx
 ```
 
 ---
 
-## 3. Verified Endpoints & Test Status
-All tests passing in `tests/test_api.py`:
-- `GET /`: Serves production Web Command Center.
-- `GET /api/health`: Status check, version, and user indexing telemetry.
-- `GET /api/users/check?q={name}`: Instant existence verification.
-- `POST /api/agent/query`: Conversational AI agent synthesizing open-ended context.
-- `GET /api/graph/topology`: Node and edge payload for graph visualization.
-- `POST /api/matchmaking/squad`: Assembles orthogonal complementary squads (Bonus Point #1).
-- `GET /api/opportunities/match`: Downstream opportunity matching (Bonus Point #2).
+## 5. Verified Endpoints & Test Status
+All 9 automated integration and authentication tests passing in `tests/test_api.py`:
+- `test_health_check` [PASS]
+- `test_root_serves_html` [PASS]
+- `test_app_serves_command_center` [PASS]
+- `test_user_existence_check_found` [PASS]
+- `test_user_existence_check_not_found` [PASS]
+- `test_agent_conversational_query_existence` [PASS]
+- `test_agent_conversational_query_frontend_recommendation` [PASS]
+- `test_graph_topology` [PASS]
+- `test_matchmaking_squad_assembly` [PASS]
+- `test_auth_login_success` [PASS]
+- `test_auth_login_failure` [PASS]
+- `test_downstream_opportunities` [PASS]
 
 ---
 
-## 4. Immediate Handoff Instructions for Subsequent AI / Agents
-1. **To start the local server**:
-   ```bash
-   uvicorn backend.api.app --reload --port 8000
-   ```
-2. **To run the CLI**:
-   ```bash
-   python cli/aether.py check "Shiv"
-   python cli/aether.py match --size 3
-   ```
-3. **To run automated tests**:
-   ```bash
-   python tests/test_api.py
-   ```
-4. **To deploy to Render**:
-   - Link GitHub repository `shashank-tomar0/aether-context` to Render as a Web Service.
-   - Set build command: `pip install -r backend/requirements.txt`
-   - Set start command: `uvicorn backend.api:app --host 0.0.0.0 --port $PORT`
-   - Bind custom domain CNAME in DNS to `shashanktomar.dev`.
+## 6. How to Run & Verify
+```bash
+# 1. Start Server
+uvicorn backend.api:app --host 127.0.0.1 --port 8000
+
+# 2. Run CLI
+python cli/aether.py check "Shiv"
+python cli/aether.py match --size 3
+
+# 3. Run Automated Tests
+python tests/test_api.py
+```
