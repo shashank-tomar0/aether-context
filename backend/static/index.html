@@ -7,114 +7,174 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..700;1,14..32,300..700&family=Geist+Mono:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
     :root {
-      --surface: #f5f5f2;
-      --surface-raised: #fbfbf8;
-      --surface-darker: #e7e7e3;
-      --border-card: #dee2de;
-      --border-pill: #e3e3e0;
-      --ink: #262323cc;
-      --ink-strong: #262323d9;
-      --ink-strongest: #262323e6;
-      --ink-muted: #262323b3;
-      --ink-faint: #26232380;
-      --ink-solid: #202020;
-      --accent: #a76451;
-      --lime: #bbf451;
+      --surface: #f4f3ef;
+      --surface-raised: #faf9f7;
+      --surface-darker: #e8e7e2;
+      --border-card: #e2e1db;
+      --border-pill: #dddcD8;
+      --ink: #1c1a1acc;
+      --ink-strong: #1c1a1adf;
+      --ink-strongest: #1c1a1aef;
+      --ink-muted: #1c1a1a99;
+      --ink-faint: #1c1a1a66;
+      --ink-solid: #181616;
+      --accent: #a05c48;
+      --lime: #b8f04a;
       --success: #1a7f37;
       --danger: #b3261e;
     }
+    *, *::before, *::after { box-sizing: border-box; }
     body {
       background-color: var(--surface);
       color: var(--ink);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+      font-optical-sizing: auto;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
       overflow-x: hidden;
     }
-    .font-mono { font-family: 'IBM Plex Mono', monospace; }
+    .font-mono { font-family: 'Geist Mono', 'Courier New', monospace; letter-spacing: -0.01em; }
     .font-display { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; }
 
     .card-surface {
       background: var(--surface-raised);
       border: 1px solid var(--border-card);
-      border-radius: 16px;
+      border-radius: 14px;
     }
     .card-surface-raised {
       background: #fff;
       border: 1px solid var(--border-card);
-      border-radius: 12px;
+      border-radius: 11px;
     }
     .btn-solid {
       background: var(--ink-solid);
-      color: #fbfbf8;
+      color: #f8f7f4;
       border-radius: 9999px;
-      font-weight: 600;
-      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 550;
+      font-size: 12px;
+      letter-spacing: 0.01em;
+      transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .btn-solid:hover { background: #000; transform: translateY(-1px); }
+    .btn-solid:hover { background: #000; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.18); }
     .btn-ghost {
       background: var(--surface-raised);
       color: var(--ink-strong);
       border: 1px solid var(--border-pill);
       border-radius: 9999px;
-      font-weight: 500;
-      transition: all 0.15s ease;
+      font-weight: 480;
+      font-size: 12px;
+      transition: all 0.12s ease;
     }
-    .btn-ghost:hover { border-color: var(--ink-faint); }
-    .tab-btn { transition: all 0.15s ease; border-radius: 9999px; }
+    .btn-ghost:hover { border-color: var(--ink-faint); background: #fff; }
+    .tab-btn {
+      transition: all 0.12s ease;
+      border-radius: 9999px;
+      font-size: 12.5px;
+      font-weight: 460;
+      letter-spacing: -0.01em;
+      color: var(--ink-muted);
+      padding: 5px 14px;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--ink-strong); }
     .tab-active {
       background: var(--ink-solid) !important;
-      color: #fbfbf8 !important;
+      color: #f8f7f4 !important;
+      font-weight: 540 !important;
     }
     .pill-status {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 3px 10px; border-radius: 9999px;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 9px; border-radius: 9999px;
       background: var(--surface-raised); border: 1px solid var(--border-pill);
-      font-size: 11px;
+      font-size: 10.5px; letter-spacing: 0.01em;
     }
-    .dot { width: 6px; height: 6px; border-radius: 9999px; display: inline-block; }
+    .dot { width: 6px; height: 6px; border-radius: 9999px; display: inline-block; flex-shrink: 0; }
     .eyebrow {
-      font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--ink-faint);
+      font-family: 'Geist Mono', monospace;
+      font-size: 9.5px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      font-weight: 500;
     }
     .chip {
       padding: 4px 12px; border-radius: 9999px; font-size: 11px;
       background: var(--surface-raised); border: 1px solid var(--border-pill);
-      font-family: 'IBM Plex Mono', monospace; color: var(--ink-muted);
-      transition: all 0.15s ease;
+      font-family: 'Geist Mono', monospace; color: var(--ink-muted);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      transition: all 0.12s ease;
     }
-    .chip:hover { border-color: var(--ink-faint); color: var(--ink-strong); }
+    .chip:hover { border-color: var(--ink-faint); color: var(--ink-strong); background: #fff; }
     .builder-row {
-      background: #fff; border: 1px solid var(--border-card); border-radius: 12px;
-      transition: all 0.15s ease; cursor: pointer;
+      background: #fff; border: 1px solid var(--border-card); border-radius: 11px;
+      transition: all 0.12s ease; cursor: pointer;
     }
-    .builder-row:hover { border-color: var(--ink-faint); transform: translateY(-1px); }
+    .builder-row:hover { border-color: var(--ink-faint); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
     .field-input {
-      background: #fff; border: 1px solid var(--border-pill); border-radius: 12px;
-      color: var(--ink-strongest); font-family: 'IBM Plex Mono', monospace;
-      transition: border-color 0.15s ease;
+      background: #fff; border: 1px solid var(--border-pill); border-radius: 11px;
+      color: var(--ink-strongest);
+      font-size: 13.5px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
-    .field-input:focus { outline: none; border-color: var(--accent); }
+    .field-input:focus { outline: none; border-color: #b0aeaa; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
     .field-input::placeholder { color: var(--ink-faint); }
     table.data th {
-      font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase;
-      letter-spacing: 0.08em; color: var(--ink-faint); text-align: left;
+      font-family: 'Geist Mono', monospace; font-size: 9.5px; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--ink-faint); font-weight: 500; text-align: left;
       padding: 8px 12px; border-bottom: 1px solid var(--border-card);
     }
     table.data td {
       padding: 8px 12px; font-size: 12px; color: var(--ink);
-      border-bottom: 1px solid #edeeea; font-family: 'IBM Plex Mono', monospace;
+      border-bottom: 1px solid #eae9e4; font-family: 'Geist Mono', monospace;
+      letter-spacing: -0.01em;
     }
     table.data tr:hover td { background: var(--surface); }
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #d4d6d0; border-radius: 4px; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-    .fade-up { animation: fadeUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) both; }
+    ::-webkit-scrollbar-thumb { background: #ccccc6; border-radius: 4px; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .fade-up { animation: fadeUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both; }
     .hidden { display: none !important; }
+    /* Header wordmark */
+    .wordmark-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 640;
+      letter-spacing: -0.03em;
+      color: var(--ink-strongest);
+      line-height: 1;
+    }
+    .wordmark-sub {
+      font-family: 'Geist Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      font-weight: 400;
+      line-height: 1;
+    }
+    /* Search bar in sidebar */
+    .search-input {
+      background: #fff;
+      border: 1px solid var(--border-pill);
+      border-radius: 9px;
+      font-size: 12.5px;
+      color: var(--ink-strong);
+      letter-spacing: -0.01em;
+      transition: border-color 0.12s ease, box-shadow 0.12s ease;
+      font-weight: 400;
+    }
+    .search-input:focus { outline: none; border-color: #b0aeaa; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+    .search-input::placeholder { color: var(--ink-faint); font-size: 12px; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -124,11 +184,11 @@
     <div class="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
 
       <div class="flex items-center gap-3">
-        <a href="/" class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg flex items-center justify-center font-mono font-semibold text-xs" style="background:var(--ink-solid);color:#fbfbf8">AE</div>
-          <div>
-            <span class="font-display text-lg" style="color:var(--ink-strongest)">AETHER</span>
-            <span class="eyebrow ml-1">Context Command Center</span>
+        <a href="/" class="flex items-center gap-2.5" style="text-decoration:none">
+          <div class="w-7 h-7 rounded-lg flex items-center justify-center font-mono font-semibold text-[11px]" style="background:var(--ink-solid);color:#f8f7f4;letter-spacing:-0.02em">AE</div>
+          <div class="flex flex-col gap-[2px]">
+            <span class="wordmark-text">AETHER</span>
+            <span class="wordmark-sub">Context Command Center</span>
           </div>
         </a>
 
@@ -179,9 +239,9 @@
             <div class="relative">
               <input id="query-input" type="text"
                 placeholder="Ask: 'Is Ashwin Gupta in our database?' or 'Evaluate Shiv Sharma for distributed systems'..."
-                class="field-input w-full px-4 py-3.5 text-sm pr-28"
+                class="field-input w-full px-4 py-3.5 text-[13.5px] pr-32 font-sans"
                 onkeydown="if(event.key === 'Enter') runQuery()" />
-              <button onclick="runQuery()" class="btn-solid absolute right-2 top-2 px-5 py-2 text-xs font-mono">Synthesize</button>
+              <button onclick="runQuery()" class="btn-solid absolute right-2 top-2 px-5 py-2 text-xs font-mono tracking-tight shadow-sm hover:shadow">Synthesize</button>
             </div>
 
             <div class="flex flex-wrap items-center gap-2 pt-1 text-xs">
@@ -233,7 +293,7 @@
               <span class="text-[10px] font-mono" style="color:var(--ink-faint)">TOP 50 / <span id="builder-count-mirror">-</span></span>
             </div>
             <input type="text" placeholder="Filter by name, handle, skill..." oninput="filterBuilders(this.value)"
-              class="field-input w-full px-3 py-2 text-xs mb-3" />
+              class="search-input w-full px-3 py-2 text-xs mb-3" />
             <div id="users-list" class="space-y-2 max-h-[560px] overflow-y-auto pr-1"></div>
           </div>
         </div>
