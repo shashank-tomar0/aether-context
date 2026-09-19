@@ -290,6 +290,56 @@ def cmd_audit(limit: int = 20):
         )
     console.print(table)
 
+def cmd_stats():
+    profiles = get_profiles()
+    from backend.config import settings
+    from backend.database.db import get_connection, get_audit_logs
+
+    conn = get_connection()
+    c = conn.cursor()
+    users_n = c.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+    projects_n = c.execute("SELECT COUNT(*) FROM projects").fetchone()[0]
+    opps_n = c.execute("SELECT COUNT(*) FROM opportunities").fetchone()[0]
+    audit_n = c.execute("SELECT COUNT(*) FROM audit_logs").fetchone()[0]
+    conn.close()
+
+    archetypes = {}
+    for p in profiles:
+        archetypes[p["archetype"]] = archetypes.get(p["archetype"], 0) + 1
+
+    grid = Table.grid(expand=True, padding=(0, 2))
+    grid.add_column(style="dim", width=28)
+    grid.add_column(style="bold white")
+    grid.add_row("Indexed Builders", f"[bold]{users_n}[/bold] (synthesized profiles: {len(profiles)})")
+    grid.add_row("Projects on Record", str(projects_n))
+    grid.add_row("Opportunities Tracked", str(opps_n))
+    grid.add_row("Audit Trail Entries", str(audit_n))
+    grid.add_row("Neo4j Aura", "[green]CONNECTED[/green]" if graph_store.neo4j_connected else "[yellow]IN-MEMORY FALLBACK[/yellow]")
+    grid.add_row("Tavily Web Sensor", "[green]CONFIGURED[/green]" if settings.TAVILY_API_KEY else "[red]MISSING KEY[/red]")
+    grid.add_row("LLM Narrative Engine", "[green]CONFIGURED[/green]" if (settings.GEMINI_API_KEY or settings.GROQ_API_KEY or settings.OPENAI_API_KEY) else "[red]MISSING KEY[/red]")
+
+    console.print(Panel(grid, title="[bold cyan]AETHER Context Layer Statistics[/bold cyan]", border_style="cyan"))
+
+    arch_table = Table(title="Archetype Distribution", border_style="dim")
+    arch_table.add_column("Archetype", style="yellow")
+    arch_table.add_column("Builders", justify="right", style="bold white")
+    for a, n in sorted(archetypes.items(), key=lambda kv: -kv[1]):
+        arch_table.add_row(a, str(n))
+    console.print(arch_table)
+
+def cmd_ingest(csv_path: str):
+    from backend.database.ingest_participants import ingest_csv_participants
+    with console.status("[bold cyan]Ingesting participants from CSV into SQLite + synthesis pipeline...[/bold cyan]"):
+        count = ingest_csv_participants(csv_path)
+    if count:
+        console.print(Panel(
+            f"[bold green]Ingested and synthesized {count} participants.[/bold green]\n"
+            f"Source: {csv_path}\nRun [cyan]aether users[/cyan] or re-open the Command Center to see the expanded index.",
+            border_style="green"
+        ))
+    else:
+        console.print(Panel(f"[bold red]Ingestion failed:[/bold red] file not found at {csv_path}", border_style="red"))
+
 def run_interactive_tui():
     """Claude-Grade Interactive TUI REPL Session"""
     print_banner()
@@ -396,6 +446,15 @@ def main():
     audit_p = subparsers.add_parser("audit", help="Inspect SQLite audit trail & query latencies")
     audit_p.add_argument("--limit", type=int, default=20, help="Number of audit rows to display")
     audit_p.set_defaults(func=lambda args: cmd_audit(limit=args.limit))
+
+    # stats
+    stats_p = subparsers.add_parser("stats", help="Live context layer statistics and integration health")
+    stats_p.set_defaults(func=lambda args: cmd_stats())
+
+    # ingest
+    ingest_p = subparsers.add_parser("ingest", help="Ingest participants from a registration CSV")
+    ingest_p.add_argument("--csv", default="backend/database/participants.csv", help="Path to participants CSV")
+    ingest_p.set_defaults(func=lambda args: cmd_ingest(args.csv))
 
     args = parser.parse_args()
     if hasattr(args, "func"):

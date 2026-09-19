@@ -65,13 +65,19 @@ class ContextSynthesizer:
                 if query:
                     prompt += f"\n\nDirect Question: {query}"
 
-                req_data = {"contents": [{"parts": [{"text": prompt}]}]}
+                req_data = {
+                    "contents": [{"parts": [{"text": prompt}]}],
+                    "generationConfig": {
+                        "thinkingConfig": {"thinkingBudget": 0},
+                        "maxOutputTokens": 250
+                    }
+                }
                 req = urllib.request.Request(
                     url,
                     data=json.dumps(req_data).encode("utf-8"),
                     headers={"Content-Type": "application/json"}
                 )
-                with urllib.request.urlopen(req, timeout=4.0) as res:
+                with urllib.request.urlopen(req, timeout=10.0) as res:
                     data = json.loads(res.read().decode())
                     return data["candidates"][0]["content"]["parts"][0]["text"].strip()
             except Exception:

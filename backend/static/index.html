@@ -1,465 +1,413 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-[#09090b] text-[#f4f4f5]">
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AETHER // Universal Context Command Center</title>
-  
+  <title>AETHER // Context Command Center</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
     :root {
-      --bg: #09090b;
-      --surface: #121216;
-      --surface-raised: #18181f;
-      --border: rgba(255, 255, 255, 0.08);
-      --border-focus: rgba(255, 255, 255, 0.20);
-      --gold: #f59e0b;
-      --emerald: #10b981;
+      --surface: #f5f5f2;
+      --surface-raised: #fbfbf8;
+      --surface-darker: #e7e7e3;
+      --border-card: #dee2de;
+      --border-pill: #e3e3e0;
+      --ink: #262323cc;
+      --ink-strong: #262323d9;
+      --ink-strongest: #262323e6;
+      --ink-muted: #262323b3;
+      --ink-faint: #26232380;
+      --ink-solid: #202020;
+      --accent: #a76451;
+      --lime: #bbf451;
+      --success: #1a7f37;
+      --danger: #b3261e;
     }
     body {
-      background-color: var(--bg);
-      color: #f4f4f5;
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--surface);
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       overflow-x: hidden;
     }
-    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .font-mono { font-family: 'IBM Plex Mono', monospace; }
+    .font-display { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; }
 
-    /* Fine 1px border architecture (Taste skill) */
     .card-surface {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-card);
       border-radius: 16px;
     }
     .card-surface-raised {
-      background: var(--surface-raised);
-      border: 1px solid var(--border);
+      background: #fff;
+      border: 1px solid var(--border-card);
       border-radius: 12px;
     }
-
-    /* Tab active state */
-    .tab-btn {
+    .btn-solid {
+      background: var(--ink-solid);
+      color: #fbfbf8;
+      border-radius: 9999px;
+      font-weight: 600;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-solid:hover { background: #000; transform: translateY(-1px); }
+    .btn-ghost {
+      background: var(--surface-raised);
+      color: var(--ink-strong);
+      border: 1px solid var(--border-pill);
+      border-radius: 9999px;
+      font-weight: 500;
       transition: all 0.15s ease;
     }
+    .btn-ghost:hover { border-color: var(--ink-faint); }
+    .tab-btn { transition: all 0.15s ease; border-radius: 9999px; }
     .tab-active {
-      background: rgba(255, 255, 255, 0.12) !important;
-      color: #ffffff !important;
-      border-color: rgba(255, 255, 255, 0.2) !important;
+      background: var(--ink-solid) !important;
+      color: #fbfbf8 !important;
     }
-
-    /* Gold CTA button matching cofounder palette */
-    .btn-gold {
-      background: linear-gradient(180deg, #FCD34D 0%, #F59E0B 100%);
-      color: #09090b;
-      font-weight: 700;
-      box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
-      transition: all 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+    .pill-status {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 3px 10px; border-radius: 9999px;
+      background: var(--surface-raised); border: 1px solid var(--border-pill);
+      font-size: 11px;
     }
-    .btn-gold:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.5);
+    .dot { width: 6px; height: 6px; border-radius: 9999px; display: inline-block; }
+    .eyebrow {
+      font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--ink-faint);
     }
-
+    .chip {
+      padding: 4px 12px; border-radius: 9999px; font-size: 11px;
+      background: var(--surface-raised); border: 1px solid var(--border-pill);
+      font-family: 'IBM Plex Mono', monospace; color: var(--ink-muted);
+      transition: all 0.15s ease;
+    }
+    .chip:hover { border-color: var(--ink-faint); color: var(--ink-strong); }
+    .builder-row {
+      background: #fff; border: 1px solid var(--border-card); border-radius: 12px;
+      transition: all 0.15s ease; cursor: pointer;
+    }
+    .builder-row:hover { border-color: var(--ink-faint); transform: translateY(-1px); }
+    .field-input {
+      background: #fff; border: 1px solid var(--border-pill); border-radius: 12px;
+      color: var(--ink-strongest); font-family: 'IBM Plex Mono', monospace;
+      transition: border-color 0.15s ease;
+    }
+    .field-input:focus { outline: none; border-color: var(--accent); }
+    .field-input::placeholder { color: var(--ink-faint); }
+    table.data th {
+      font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--ink-faint); text-align: left;
+      padding: 8px 12px; border-bottom: 1px solid var(--border-card);
+    }
+    table.data td {
+      padding: 8px 12px; font-size: 12px; color: var(--ink);
+      border-bottom: 1px solid #edeeea; font-family: 'IBM Plex Mono', monospace;
+    }
+    table.data tr:hover td { background: var(--surface); }
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #d4d6d0; border-radius: 4px; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .fade-up { animation: fadeUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) both; }
+    .hidden { display: none !important; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-amber-500/20 selection:text-amber-200">
+<body class="min-h-screen flex flex-col">
 
   <!-- COMMAND CENTER TOP BAR -->
-  <header class="sticky top-0 z-50 bg-[#09090b]/90 backdrop-blur-md border-b border-[rgba(255,255,255,0.08)] px-6 py-3">
+  <header class="sticky top-0 z-50 backdrop-blur-md border-b px-6 py-3" style="background:rgba(245,245,242,0.88);border-color:var(--border-card)">
     <div class="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
-      
-      <!-- Brand & Version -->
+
       <div class="flex items-center gap-3">
         <a href="/" class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-white text-zinc-950 flex items-center justify-center font-mono font-bold text-xs tracking-tight shadow-md">
-            AE
-          </div>
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center font-mono font-semibold text-xs" style="background:var(--ink-solid);color:#fbfbf8">AE</div>
           <div>
-            <span class="font-bold text-sm tracking-tight text-white">AETHER</span>
-            <span class="text-[10px] text-zinc-400 font-mono ml-1 uppercase">// Universal Context</span>
+            <span class="font-display text-lg" style="color:var(--ink-strongest)">AETHER</span>
+            <span class="eyebrow ml-1">Context Command Center</span>
           </div>
         </a>
 
-        <!-- Live Telemetry Beacons (Taste Skill: Real-Time Polish) -->
-        <div class="hidden xl:flex items-center gap-2 pl-4 border-l border-zinc-800 text-[11px] font-mono">
-          <span class="px-2.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 flex items-center gap-1.5 font-medium">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            Neo4j Aura Cloud Live
-          </span>
-          <span class="px-2.5 py-0.5 rounded-full bg-blue-950/60 text-blue-400 border border-blue-800/60 flex items-center gap-1.5 font-medium">
-            <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-            Tavily Web Sensor Active
-          </span>
-          <span class="px-2.5 py-0.5 rounded-full bg-purple-950/60 text-purple-400 border border-purple-800/60 flex items-center gap-1.5 font-medium">
-            <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
-            Gemini 2.5 Flash LLM Live
-          </span>
-          <span class="px-2.5 py-0.5 rounded-full bg-cyan-950/60 text-cyan-400 border border-cyan-800/60 flex items-center gap-1.5 font-medium">
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
-            WebSocket Stream Live
-          </span>
-          <span class="px-2.5 py-0.5 rounded-full bg-amber-950/60 text-amber-400 border border-amber-800/60 flex items-center gap-1.5 font-medium">
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-            SQLite: <span id="builder-count-badge">661</span> Builders
-          </span>
+        <div class="hidden xl:flex items-center gap-2 pl-4 text-[11px] font-mono" style="border-left:1px solid var(--border-card)">
+          <span class="pill-status"><span class="dot" style="background:var(--success)"></span>Neo4j Aura Live</span>
+          <span class="pill-status"><span class="dot" style="background:var(--success)"></span>Tavily Sensor</span>
+          <span class="pill-status"><span class="dot" style="background:var(--success)"></span>Gemini 2.5 Flash</span>
+          <span class="pill-status"><span class="dot" style="background:var(--accent)"></span>WebSocket</span>
+          <span class="pill-status"><span class="dot" style="background:var(--ink-solid)"></span>SQLite: <span id="builder-count-badge">-</span> Builders</span>
         </div>
       </div>
 
-      <!-- 7 TABS -->
-      <nav class="flex items-center gap-1 p-1 rounded-xl bg-zinc-900/90 border border-zinc-800 text-xs font-medium overflow-x-auto max-w-full">
-        <button onclick="switchTab('agent')" id="tab-agent" class="tab-btn px-3 py-1.5 rounded-lg text-zinc-300 transition-all tab-active font-semibold">Conversational Agent</button>
-        <button onclick="switchTab('graph')" id="tab-graph" class="tab-btn px-3 py-1.5 rounded-lg text-zinc-400 hover:text-white transition-all">Relational Graph</button>
-        <button onclick="switchTab('match')" id="tab-match" class="tab-btn px-3 py-1.5 rounded-lg text-zinc-400 hover:text-white transition-all">Squad Matchmaker</button>
-        <button onclick="switchTab('cypher')" id="tab-cypher" class="tab-btn px-3 py-1.5 rounded-lg text-zinc-400 hover:text-white transition-all">Live Cypher</button>
-        <button onclick="switchTab('bots')" id="tab-bots" class="tab-btn px-3 py-1.5 rounded-lg text-zinc-400 hover:text-white transition-all">Telegram &amp; Slack</button>
-        <button onclick="switchTab('webhook')" id="tab-webhook" class="tab-btn px-3 py-1.5 rounded-lg text-zinc-400 hover:text-white transition-all">GitHub Webhooks</button>
-        <button onclick="switchTab('audit')" id="tab-audit" class="tab-btn px-3 py-1.5 rounded-lg text-zinc-400 hover:text-white transition-all">Audit Trail</button>
+      <nav class="flex items-center gap-1 p-1 rounded-full text-xs font-medium overflow-x-auto max-w-full" style="background:#fff;border:1px solid var(--border-pill)">
+        <button onclick="switchTab('agent')" id="tab-agent" class="tab-btn px-3.5 py-1.5 tab-active font-semibold" style="color:var(--ink-muted)">Agent</button>
+        <button onclick="switchTab('graph')" id="tab-graph" class="tab-btn px-3.5 py-1.5" style="color:var(--ink-muted)">Graph</button>
+        <button onclick="switchTab('match')" id="tab-match" class="tab-btn px-3.5 py-1.5" style="color:var(--ink-muted)">Matchmaker</button>
+        <button onclick="switchTab('cypher')" id="tab-cypher" class="tab-btn px-3.5 py-1.5" style="color:var(--ink-muted)">Cypher</button>
+        <button onclick="switchTab('bots')" id="tab-bots" class="tab-btn px-3.5 py-1.5" style="color:var(--ink-muted)">Bots</button>
+        <button onclick="switchTab('webhook')" id="tab-webhook" class="tab-btn px-3.5 py-1.5" style="color:var(--ink-muted)">Webhooks</button>
+        <button onclick="switchTab('audit')" id="tab-audit" class="tab-btn px-3.5 py-1.5" style="color:var(--ink-muted)">Audit</button>
       </nav>
 
-      <!-- Role Switcher & Back to Overview -->
       <div class="flex items-center gap-3 text-xs font-mono">
-        <a href="/" class="hidden md:inline text-zinc-400 hover:text-white transition-colors">Overview</a>
-        <a href="/login" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-[11px] border border-zinc-700 flex items-center gap-1.5">
-          <span id="nav-user-label">Switch Role</span>
-        </a>
+        <a href="/" class="hidden md:inline transition-colors" style="color:var(--ink-muted)">Overview</a>
+        <span id="nav-user-label" class="hidden md:inline" style="color:var(--ink-faint)"></span>
+        <button onclick="logout()" class="btn-ghost px-4 py-1.5 text-[11px] font-semibold">Sign out</button>
       </div>
 
     </div>
   </header>
 
-  <!-- MAIN VIEWPORT -->
   <main class="flex-1 flex flex-col p-6 max-w-[1600px] mx-auto w-full space-y-6">
 
-    <!-- ========================================================================= -->
-    <!-- TAB 1: CONVERSATIONAL AGENT & EXISTENCE CHECK (CORE RUBRIC) -->
-    <!-- ========================================================================= -->
-    <div id="view-agent" class="space-y-6">
+    <!-- TAB 1: CONVERSATIONAL AGENT -->
+    <div id="view-agent" class="space-y-6 fade-up">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        <!-- Left: Search & Narrative Stream -->
+
         <div class="lg:col-span-8 space-y-4">
-          
-          <!-- Omnisearch Card -->
           <div class="card-surface p-6 space-y-4">
             <div class="flex items-center justify-between">
-              <label class="text-xs font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-2 font-semibold">
-                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+              <label class="eyebrow flex items-center gap-2 font-semibold">
+                <span class="dot" style="background:var(--accent)"></span>
                 <span>Universal Context Omnisearch &amp; Existence Check</span>
               </label>
-              <span class="text-[11px] font-mono text-zinc-500">661 Builders Index &bull; Gemini 2.5 Flash &bull; Tavily</span>
+              <span class="text-[11px] font-mono" style="color:var(--ink-faint)"><span id="indexed-count-text">(-)</span> Builders &bull; Gemini 2.5 Flash &bull; Tavily</span>
             </div>
 
             <div class="relative">
-              <input 
-                id="query-input" 
-                type="text" 
-                placeholder="Ask open-ended queries: 'Is Ashwin Gupta in our database?' or 'Evaluate Shiv Sharma for distributed systems'..."
-                class="w-full bg-[#18181f] border border-zinc-800 rounded-xl px-4 py-3.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-amber-500 font-mono transition shadow-inner"
-                onkeydown="if(event.key === 'Enter') runQuery()"
-              />
-              <button 
-                onclick="runQuery()" 
-                class="absolute right-2 top-2 px-5 py-2 rounded-lg btn-gold text-xs font-bold font-mono tracking-tight"
-              >
-                Synthesize
-              </button>
+              <input id="query-input" type="text"
+                placeholder="Ask: 'Is Ashwin Gupta in our database?' or 'Evaluate Shiv Sharma for distributed systems'..."
+                class="field-input w-full px-4 py-3.5 text-sm pr-28"
+                onkeydown="if(event.key === 'Enter') runQuery()" />
+              <button onclick="runQuery()" class="btn-solid absolute right-2 top-2 px-5 py-2 text-xs font-mono">Synthesize</button>
             </div>
 
-            <!-- Quick Suggestion Chips (Real Builders from Hackathon Dataset) -->
             <div class="flex flex-wrap items-center gap-2 pt-1 text-xs">
-              <span class="text-zinc-500 text-[11px] font-mono">Suggested:</span>
-              <button onclick="setQuery('Is Shiv in our database? What has he built?')" class="px-3 py-1 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 font-mono text-[11px] transition">
-                "Is Shiv in our database?"
-              </button>
-              <button onclick="setQuery('Evaluate Ashwin Gupta: background and skills')" class="px-3 py-1 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 font-mono text-[11px] transition">
-                "Ashwin Gupta"
-              </button>
-              <button onclick="setQuery('Tell me about Chandan Kharbanda: architecture instincts')" class="px-3 py-1 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 font-mono text-[11px] transition">
-                "Chandan Kharbanda"
-              </button>
-              <button onclick="setQuery('Who is our top candidate for high-taste frontend design?')" class="px-3 py-1 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 font-mono text-[11px] transition">
-                "Top Frontend Specialist"
-              </button>
+              <span class="eyebrow">Suggested:</span>
+              <button onclick="setQuery('Is Shiv in our database? What has he built?')" class="chip">"Is Shiv in our database?"</button>
+              <button onclick="setQuery('Evaluate Ashwin Gupta: background and skills')" class="chip">"Ashwin Gupta"</button>
+              <button onclick="setQuery('Tell me about Chandan Kharbanda: architecture instincts')" class="chip">"Chandan Kharbanda"</button>
+              <button onclick="setQuery('Who is our top candidate for high-taste frontend design?')" class="chip">"Top Frontend Specialist"</button>
             </div>
           </div>
 
-          <!-- Synthesized Response Stream -->
           <div id="agent-response-card" class="card-surface p-6 space-y-4">
-            <div class="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+            <div class="flex items-center justify-between pb-3" style="border-bottom:1px solid var(--border-card)">
               <div class="flex items-center gap-3">
-                <span id="badge-existence" class="px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800/60 font-semibold">
-                  STATUS: READY
-                </span>
-                <span id="response-target" class="text-sm font-bold text-white font-mono">AETHER Cognitive Stream</span>
+                <span id="badge-existence" class="pill-status font-mono font-semibold" style="color:var(--success)">STATUS: READY</span>
+                <span id="response-target" class="text-sm font-bold font-mono" style="color:var(--ink-strongest)">AETHER Cognitive Stream</span>
               </div>
-              <span id="latency-label" class="text-xs font-mono text-zinc-500">Deterministic + Gemini 2.5 Flash</span>
+              <span id="latency-label" class="text-[11px] font-mono" style="color:var(--ink-faint)">-ms Latency</span>
             </div>
-
-            <div id="narrative-content" class="text-sm leading-relaxed text-zinc-300 space-y-3 font-sans whitespace-pre-wrap">
-Welcome to <strong>AETHER</strong>. Ask any open-ended question or existence check against the platform's 661 verified builders.
-The Cognitive Context Layer evaluates GitHub footprints, hackathon scores, commit velocities, and Tavily live web grounding.
+            <div id="narrative-content" class="text-sm leading-relaxed whitespace-pre-wrap" style="color:var(--ink)">
+              Query the context layer above. AETHER synthesizes raw platform activity, external GitHub signals,
+              and live web grounding into a verified behavioral profile for every builder in the database.
             </div>
-
-            <!-- Profile Metrics Bar -->
-            <div id="metrics-grid" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-zinc-800 font-mono text-xs">
-              <div class="bg-zinc-900/60 p-3 rounded-xl border border-zinc-800">
-                <div class="text-zinc-500 text-[10px] uppercase">Archetype</div>
-                <div id="m-archetype" class="text-white font-bold truncate mt-0.5">-</div>
+            <div id="metrics-grid" class="hidden grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
+              <div class="card-surface-raised p-4">
+                <div class="eyebrow">Archetype</div>
+                <div id="m-archetype" class="text-xs font-semibold mt-1" style="color:var(--accent)">-</div>
               </div>
-              <div class="bg-zinc-900/60 p-3 rounded-xl border border-zinc-800">
-                <div class="text-zinc-500 text-[10px] uppercase">Reliability Index</div>
-                <div id="m-reliability" class="text-emerald-400 font-bold mt-0.5">-</div>
+              <div class="card-surface-raised p-4">
+                <div class="eyebrow">Reliability</div>
+                <div id="m-reliability" class="text-lg font-bold font-mono mt-1" style="color:var(--success)">-</div>
               </div>
-              <div class="bg-zinc-900/60 p-3 rounded-xl border border-zinc-800">
-                <div class="text-zinc-500 text-[10px] uppercase">Commit Velocity</div>
-                <div id="m-velocity" class="text-amber-400 font-bold mt-0.5">-</div>
+              <div class="card-surface-raised p-4">
+                <div class="eyebrow">Commit Velocity</div>
+                <div id="m-velocity" class="text-lg font-bold font-mono mt-1" style="color:var(--ink-strongest)">-</div>
               </div>
-              <div class="bg-zinc-900/60 p-3 rounded-xl border border-zinc-800">
-                <div class="text-zinc-500 text-[10px] uppercase">Platform Win Rate</div>
-                <div id="m-winrate" class="text-blue-400 font-bold mt-0.5">-</div>
+              <div class="card-surface-raised p-4">
+                <div class="eyebrow">Win Rate</div>
+                <div id="m-winrate" class="text-lg font-bold font-mono mt-1" style="color:var(--accent)">-</div>
               </div>
             </div>
           </div>
-
         </div>
 
-        <!-- Right: Real Hackathon Participants Explorer (661 Builders) -->
-        <div class="lg:col-span-4 card-surface p-5 flex flex-col space-y-3">
-          <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
-            <div>
-              <span class="text-xs font-mono text-white uppercase tracking-wider font-semibold">Indexed Builders</span>
-              <span id="indexed-count-text" class="text-xs font-mono text-amber-400 font-bold ml-1">(661)</span>
+        <div class="lg:col-span-4 space-y-4">
+          <div class="card-surface p-5">
+            <div class="flex items-center justify-between pb-3 mb-3" style="border-bottom:1px solid var(--border-card)">
+              <span class="eyebrow font-semibold">Verified Builder Index</span>
+              <span class="text-[10px] font-mono" style="color:var(--ink-faint)">TOP 50 / <span id="builder-count-mirror">-</span></span>
             </div>
-            <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded-full border border-emerald-800">SQLite + Neo4j</span>
-          </div>
-
-          <!-- Search Filter for 661 builders -->
-          <div class="relative">
-            <input 
-              id="builder-filter" 
-              type="text" 
-              placeholder="Filter 661 builders by name/skill..." 
-              class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white placeholder:text-zinc-500 font-mono focus:outline-none focus:border-amber-500"
-              oninput="filterBuilders(this.value)"
-            />
-          </div>
-
-          <div id="users-list" class="space-y-2 overflow-y-auto max-h-[520px] pr-1">
-            <!-- Dynamically populated from /api/users -->
+            <input type="text" placeholder="Filter by name, handle, skill..." oninput="filterBuilders(this.value)"
+              class="field-input w-full px-3 py-2 text-xs mb-3" />
+            <div id="users-list" class="space-y-2 max-h-[560px] overflow-y-auto pr-1"></div>
           </div>
         </div>
 
       </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- TAB 2: RELATIONAL GRAPH TOPOLOGY (60FPS CANVAS + WEBSOCKET) -->
-    <!-- ========================================================================= -->
-    <div id="view-graph" class="hidden card-surface p-6 space-y-4">
-      <div class="flex flex-wrap items-center justify-between border-b border-zinc-800 pb-4 gap-4">
+    <!-- TAB 2: RELATIONAL GRAPH -->
+    <div id="view-graph" class="hidden space-y-4 fade-up">
+      <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-base font-bold text-white font-mono">Neo4j Aura Cloud &bull; Relational Topology Canvas</h2>
-          <p class="text-xs text-zinc-400">Interactive graph visualization of builders, cognitive archetypes, and proficient skills.</p>
+          <h2 class="font-display text-2xl" style="color:var(--ink-strongest)">Relational Knowledge Graph</h2>
+          <p class="text-xs font-mono mt-1" style="color:var(--ink-faint)">Neo4j Aura topology: Users, Archetypes, Skills, Projects, Complementarity edges</p>
         </div>
-        <div class="flex items-center gap-2">
-          <button onclick="refreshGraph()" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-mono text-xs border border-zinc-700">Refresh Graph</button>
-          <span class="px-2.5 py-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono text-xs">Live Neo4j Sync</span>
-        </div>
+        <button onclick="refreshGraph()" class="btn-solid px-5 py-2 text-xs font-mono">Refresh Topology</button>
       </div>
-
-      <div class="relative w-full h-[620px] bg-zinc-950 rounded-xl overflow-hidden border border-zinc-800">
-        <canvas id="graphCanvas" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
-        <div class="absolute bottom-4 left-4 bg-zinc-900/90 backdrop-blur-md border border-zinc-800 p-3 rounded-xl text-xs font-mono space-y-1.5">
-          <div class="text-zinc-500 uppercase text-[10px] font-bold">Node Legend</div>
-          <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span><span>Builder / Candidate (661)</span></div>
-          <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span><span>Cognitive Archetype (4)</span></div>
-          <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-cyan-500"></span><span>Technical Skill &bull; :PROFICIENT_IN</span></div>
+      <div class="card-surface p-4">
+        <div class="w-full rounded-xl overflow-hidden" style="background:#fff;border:1px solid var(--border-card);height:620px;position:relative">
+          <canvas id="graphCanvas" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+          <div class="absolute bottom-3 left-3 flex items-center gap-4 text-[10px] font-mono px-3 py-2 rounded-full" style="background:rgba(251,251,248,0.92);border:1px solid var(--border-pill);color:var(--ink-muted)">
+            <span class="flex items-center gap-1.5"><span class="dot" style="background:var(--accent)"></span>Archetype</span>
+            <span class="flex items-center gap-1.5"><span class="dot" style="background:var(--ink-solid)"></span>Builder</span>
+            <span class="flex items-center gap-1.5"><span class="dot" style="background:var(--success)"></span>Skill / Project</span>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- TAB 3: AUTONOMOUS SQUAD MATCHMAKER -->
-    <!-- ========================================================================= -->
-    <div id="view-match" class="hidden card-surface p-6 space-y-6">
-      <div class="flex flex-wrap items-center justify-between border-b border-zinc-800 pb-4 gap-4">
+    <!-- TAB 3: SQUAD MATCHMAKER -->
+    <div id="view-match" class="hidden space-y-4 fade-up">
+      <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-base font-bold text-white font-mono">Autonomous Orthogonal Squad Matchmaker</h2>
-          <p class="text-xs text-zinc-400">Computes complementary teams with mathematical synergy, eliminating skill overlap.</p>
+          <h2 class="font-display text-2xl" style="color:var(--ink-strongest)">Autonomous Squad Matchmaker</h2>
+          <p class="text-xs font-mono mt-1" style="color:var(--ink-faint)">Orthogonal complementarity search over the Neo4j graph: no redundant archetypes, maximum synergy</p>
         </div>
         <div class="flex items-center gap-3">
-          <select id="squad-size" class="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs font-mono text-white">
-            <option value="3">3-Person Squad</option>
-            <option value="4">4-Person Squad</option>
-            <option value="2">Pair Programming (2)</option>
+          <select id="squad-size" class="field-input px-3 py-2 text-xs">
+            <option value="3">Squad of 3</option>
+            <option value="4">Squad of 4</option>
+            <option value="5">Squad of 5</option>
           </select>
-          <button onclick="computeSquad()" class="px-4 py-2 btn-gold text-xs font-bold font-mono rounded-lg">Compute Squad</button>
+          <button onclick="computeSquad()" class="btn-solid px-5 py-2 text-xs font-mono">Assemble Optimal Squad</button>
         </div>
       </div>
-
       <div id="squad-result" class="space-y-4">
-        <!-- Squad assembled output -->
+        <div class="card-surface p-8 text-center text-xs font-mono" style="color:var(--ink-faint)">
+          Computing initial optimal squad from <span id="match-pool-hint">-</span> indexed builders...
+        </div>
       </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- TAB 4: LIVE CYPHER CONSOLE -->
-    <!-- ========================================================================= -->
-    <div id="view-cypher" class="hidden card-surface p-6 space-y-4">
-      <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+    <!-- TAB 4: LIVE CYPHER -->
+    <div id="view-cypher" class="hidden space-y-4 fade-up">
+      <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-base font-bold text-white font-mono">Neo4j Aura Cloud Live Cypher Console</h2>
-          <p class="text-xs text-zinc-400">Executes real Cypher directly against neo4j+s://b6c72f14.databases.neo4j.io.</p>
+          <h2 class="font-display text-2xl" style="color:var(--ink-strongest)">Live Cypher Console</h2>
+          <p class="text-xs font-mono mt-1" style="color:var(--ink-faint)">Direct execution against the connected Neo4j Aura instance</p>
         </div>
+        <span class="pill-status font-mono"><span class="dot" style="background:var(--success)"></span>Aura Connected</span>
       </div>
-
-      <div class="space-y-3">
-        <textarea id="cypher-input" rows="3" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-xs font-mono text-emerald-400 focus:outline-none focus:border-emerald-500">MATCH (u:User)-[:HAS_ARCHETYPE]->(a:Archetype) RETURN u.name as Name, u.username as Handle, a.name as Archetype LIMIT 10</textarea>
+      <div class="card-surface p-5 space-y-3">
+        <textarea id="cypher-input" rows="3" class="field-input w-full px-4 py-3 text-xs" placeholder="MATCH (u:User)-[:PROFICIENT_IN]->(s:Skill) RETURN u.name, s.name LIMIT 25">MATCH (u:User)-[:HAS_ARCHETYPE]->(a:Archetype) RETURN u.name, u.reliability_score, a.name LIMIT 25</textarea>
         <div class="flex items-center justify-between">
-          <button onclick="executeCypher()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-black font-bold font-mono text-xs rounded-lg">Run Cypher</button>
-          <span id="cypher-count" class="text-xs font-mono text-zinc-500">Ready</span>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="document.getElementById('cypher-input').value='MATCH (u:User) RETURN u.name, u.archetype, u.reliability_score ORDER BY u.reliability_score DESC LIMIT 15'; executeCypher();" class="chip">Top builders</button>
+            <button onclick="document.getElementById('cypher-input').value='MATCH (u:User)-[:PROFICIENT_IN]->(s:Skill) RETURN s.name, count(u) AS builders ORDER BY builders DESC LIMIT 15'; executeCypher();" class="chip">Skill demand</button>
+            <button onclick="document.getElementById('cypher-input').value='MATCH (a:User)-[:COMPLEMENTS]->(b:User) RETURN a.name, b.name LIMIT 15'; executeCypher();" class="chip">Complement pairs</button>
+          </div>
+          <button onclick="executeCypher()" class="btn-solid px-5 py-2 text-xs font-mono">Execute</button>
         </div>
-      </div>
-
-      <div id="cypher-results" class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 overflow-x-auto max-h-96 font-mono text-xs">
-        <span class="text-zinc-600">Results will appear here...</span>
+        <div class="flex items-center justify-between pt-1">
+          <span id="cypher-count" class="text-[11px] font-mono" style="color:var(--ink-faint)">Awaiting execution</span>
+        </div>
+        <div id="cypher-results" class="overflow-auto max-h-[420px] text-xs" style="color:var(--ink-muted)"></div>
       </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- TAB 5: BOT ECOSYSTEM (TELEGRAM & SLACK) -->
-    <!-- ========================================================================= -->
-    <div id="view-bots" class="hidden card-surface p-6 space-y-6">
-      <div class="border-b border-zinc-800 pb-4">
-        <h2 class="text-base font-bold text-white font-mono">Bot Ecosystem: Telegram &amp; Slack Integrations</h2>
-        <p class="text-xs text-zinc-400">Instant context cards directly inside team chat apps.</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        <!-- Telegram Bot Simulator -->
-        <div class="card-surface-raised p-5 space-y-4">
-          <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
-            <div class="flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full bg-sky-500"></span>
-              <span class="font-bold text-sm text-white font-mono">Telegram Bot Simulator</span>
-            </div>
-            <span class="text-[10px] font-mono text-zinc-500">POST /api/integrations/telegram/webhook</span>
-          </div>
-
-          <div class="flex gap-2">
-            <input id="tg-cmd" type="text" value="/check Ashwin" class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono text-white" />
-            <button onclick="simulateTelegram()" class="px-3 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold font-mono text-xs rounded-lg">Send</button>
-          </div>
-
-          <div id="tg-preview" class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 font-mono text-xs text-sky-200 whitespace-pre-wrap min-h-[160px]">
-            Run a command like /check Shiv or /match to preview the Telegram response.
-          </div>
-        </div>
-
-        <!-- Slack Bot Simulator -->
-        <div class="card-surface-raised p-5 space-y-4">
-          <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
-            <div class="flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full bg-amber-500"></span>
-              <span class="font-bold text-sm text-white font-mono">Slack Slash Command Simulator</span>
-            </div>
-            <span class="text-[10px] font-mono text-zinc-500">POST /api/integrations/slack/webhook</span>
-          </div>
-
-          <div class="flex gap-2">
-            <input id="slack-cmd" type="text" value="check Shiv" class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono text-white" />
-            <button onclick="simulateSlack()" class="px-3 py-2 btn-gold text-xs font-bold font-mono rounded-lg">Send</button>
-          </div>
-
-          <div id="slack-preview" class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 font-mono text-xs text-amber-200 overflow-x-auto min-h-[160px]">
-            Run a command like check Shiv or match to preview the Slack Block Kit output.
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- TAB 6: GITHUB WEBHOOK INGESTOR -->
-    <!-- ========================================================================= -->
-    <div id="view-webhook" class="hidden card-surface p-6 space-y-6">
-      <div class="border-b border-zinc-800 pb-4">
-        <h2 class="text-base font-bold text-white font-mono">GitHub Real-Time Webhook Ingestion Engine</h2>
-        <p class="text-xs text-zinc-400">POST /webhooks/github &bull; Automatically triggers real-time velocity updates into SQLite and Neo4j.</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="card-surface-raised p-5 space-y-3">
-          <span class="text-xs font-mono text-white uppercase font-bold">Simulate Real GitHub Push Event</span>
-          <textarea id="webhook-payload" rows="6" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-xs font-mono text-zinc-300">
-{
-  "action": "push",
-  "sender": { "login": "shiv-sharma" },
-  "repository": { "full_name": "shiv/raft-engine" },
-  "commits": [
-    { "message": "feat(consensus): implement raft leader election" },
-    { "message": "perf(stream): zero-copy network buffer" }
-  ]
-}
-          </textarea>
-          <button onclick="triggerWebhook()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-black font-bold font-mono text-xs rounded-lg">Trigger Webhook</button>
-        </div>
-
-        <div class="card-surface-raised p-5 space-y-3">
-          <span class="text-xs font-mono text-white uppercase font-bold">Live Ingestion Telemetry</span>
-          <div id="webhook-log" class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 font-mono text-xs text-emerald-400 min-h-[140px] whitespace-pre-wrap">
-            Awaiting webhook triggers...
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- TAB 7: SQLITE AUDIT TRAIL & TELEMETRY -->
-    <!-- ========================================================================= -->
-    <div id="view-audit" class="hidden card-surface p-6 space-y-4">
-      <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+    <!-- TAB 5: BOTS -->
+    <div id="view-bots" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-6 fade-up">
+      <div class="card-surface p-6 space-y-4">
         <div>
-          <h2 class="text-base font-bold text-white font-mono">Persistent SQLite Audit Trail</h2>
-          <p class="text-xs text-zinc-400">Timestamped query latency logs stored in backend/database/aether.db.</p>
+          <h2 class="font-display text-2xl" style="color:var(--ink-strongest)">Telegram Bot</h2>
+          <p class="text-xs font-mono mt-1" style="color:var(--ink-faint)">@aether_context_bot &mdash; /check, /match, /stats in any channel</p>
         </div>
-        <button onclick="loadAuditLogs()" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-mono text-xs border border-zinc-700">Refresh</button>
+        <div class="flex gap-2">
+          <input id="tg-cmd" class="field-input flex-1 px-3 py-2.5 text-xs" value="/check Shiv" />
+          <button onclick="simulateTelegram()" class="btn-solid px-5 py-2 text-xs font-mono">Send</button>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="document.getElementById('tg-cmd').value='/match'; simulateTelegram();" class="chip">/match</button>
+          <button onclick="document.getElementById('tg-cmd').value='/check Ashwin Gupta'; simulateTelegram();" class="chip">/check Ashwin Gupta</button>
+          <button onclick="document.getElementById('tg-cmd').value='/stats'; simulateTelegram();" class="chip">/stats</button>
+        </div>
+        <div id="tg-preview" class="card-surface-raised p-4 text-xs whitespace-pre-wrap leading-relaxed min-h-[180px]" style="color:var(--ink)">Run a command to preview the bot response.</div>
       </div>
+      <div class="card-surface p-6 space-y-4">
+        <div>
+          <h2 class="font-display text-2xl" style="color:var(--ink-strongest)">Slack Slash Command</h2>
+          <p class="text-xs font-mono mt-1" style="color:var(--ink-faint)">/aether check @builder &mdash; official Block Kit cards</p>
+        </div>
+        <div class="flex gap-2">
+          <input id="slack-cmd" class="field-input flex-1 px-3 py-2.5 text-xs" value="check Shiv" />
+          <button onclick="simulateSlack()" class="btn-solid px-5 py-2 text-xs font-mono">Send</button>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="document.getElementById('slack-cmd').value='match'; simulateSlack();" class="chip">match</button>
+          <button onclick="document.getElementById('slack-cmd').value='check Elena Craft'; simulateSlack();" class="chip">check Elena</button>
+        </div>
+        <div id="slack-preview" class="card-surface-raised p-4 text-xs overflow-auto max-h-[300px] min-h-[180px] font-mono" style="color:var(--ink)">Run a command to preview the Block Kit payload.</div>
+      </div>
+    </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left font-mono text-xs">
+    <!-- TAB 6: WEBHOOKS -->
+    <div id="view-webhook" class="hidden space-y-4 fade-up">
+      <div>
+        <h2 class="font-display text-2xl" style="color:var(--ink-strongest)">GitHub Webhook Ingestion</h2>
+        <p class="text-xs font-mono mt-1" style="color:var(--ink-faint)">POST /webhooks/github &mdash; push events stream into the context layer over WebSocket</p>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="card-surface p-6 space-y-3">
+          <span class="eyebrow font-semibold">Event Payload</span>
+          <textarea id="webhook-payload" rows="10" class="field-input w-full px-4 py-3 text-xs">{
+  "sender": { "login": "CxashxG" },
+  "repository": { "full_name": "CxashxG/aether-core" },
+  "commits": [
+    { "message": "feat: cognitive synthesis pipeline" },
+    { "message": "fix: graph affinity scoring" }
+  ]
+}</textarea>
+          <button onclick="triggerWebhook()" class="btn-solid px-5 py-2 text-xs font-mono">Trigger Push Event</button>
+        </div>
+        <div class="card-surface p-6 space-y-3">
+          <span class="eyebrow font-semibold">Live Ingestion Log</span>
+          <div id="webhook-log" class="card-surface-raised p-4 text-[11px] font-mono leading-relaxed overflow-auto max-h-[340px] min-h-[240px]" style="color:var(--ink-muted)">
+            Awaiting first ingestion event... connect the WebSocket stream for live delivery.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 7: AUDIT -->
+    <div id="view-audit" class="hidden space-y-4 fade-up">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="font-display text-2xl" style="color:var(--ink-strongest)">Query Audit Trail</h2>
+          <p class="text-xs font-mono mt-1" style="color:var(--ink-faint)">Every context query is persisted in SQLite with latency and existence result</p>
+        </div>
+        <button onclick="loadAuditLogs()" class="btn-ghost px-5 py-2 text-xs font-mono">Reload</button>
+      </div>
+      <div class="card-surface p-4 overflow-x-auto">
+        <table class="data w-full">
           <thead>
-            <tr class="border-b border-zinc-800 text-zinc-500">
-              <th class="py-2 px-3">ID</th>
-              <th class="py-2 px-3">Timestamp</th>
-              <th class="py-2 px-3">Target User</th>
-              <th class="py-2 px-3">Result</th>
-              <th class="py-2 px-3">Latency</th>
-              <th class="py-2 px-3">Query</th>
-            </tr>
+            <tr><th>#</th><th>Timestamp</th><th>Target</th><th>Exists</th><th>Latency</th><th>Query</th></tr>
           </thead>
-          <tbody id="audit-tbody" class="divide-y divide-zinc-800/60 text-zinc-300">
-            <!-- Injected via /api/audit/logs -->
-          </tbody>
+          <tbody id="audit-tbody"></tbody>
         </table>
       </div>
     </div>
 
   </main>
 
-  <!-- JAVASCRIPT APP LOGIC -->
+  <footer class="px-6 py-4 text-center text-[11px] font-mono" style="color:var(--ink-faint);border-top:1px solid var(--border-card)">
+    AETHER Universal Context Layer &middot; Neo4j Aura &middot; Cognee &middot; Tavily &middot; Render
+  </footer>
+
   <script>
     let ALL_BUILDERS = [];
     let ws = null;
 
-    // Connect WebSocket
+    async function logout() {
+      try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (e) {}
+      window.location.href = '/login';
+    }
+
     function connectWebSocket() {
       try {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -468,15 +416,12 @@ The Cognitive Context Layer evaluates GitHub footprints, hackathon scores, commi
         ws.onmessage = (e) => {
           const msg = JSON.parse(e.data);
           if (msg.type === 'GITHUB_INGESTION_EVENT') {
-            document.getElementById('webhook-log').innerText = `[WS LIVE] Received GitHub Push on ${msg.repo} by @${msg.sender}\n${document.getElementById('webhook-log').innerText}`;
+            document.getElementById('webhook-log').innerText = `[WS LIVE] ${msg.event} on ${msg.repo} by @${msg.sender} (${msg.commit_count} commits)\n${document.getElementById('webhook-log').innerText}`;
           }
         };
-      } catch (err) {
-        console.log('WS fallback');
-      }
+      } catch (err) { console.log('WS fallback'); }
     }
 
-    // Tab Switching
     function switchTab(tabId) {
       ['agent', 'graph', 'match', 'cypher', 'bots', 'webhook', 'audit'].forEach(t => {
         document.getElementById(`view-${t}`).classList.add('hidden');
@@ -484,24 +429,22 @@ The Cognitive Context Layer evaluates GitHub footprints, hackathon scores, commi
       });
       document.getElementById(`view-${tabId}`).classList.remove('hidden');
       document.getElementById(`tab-${tabId}`).classList.add('tab-active');
-
       if (tabId === 'graph') renderGraph();
       if (tabId === 'audit') loadAuditLogs();
     }
 
-    // Set query
     function setQuery(q) {
       document.getElementById('query-input').value = q;
       runQuery();
     }
 
-    // Run query
     async function runQuery() {
       const q = document.getElementById('query-input').value.trim();
       if (!q) return;
-
-      document.getElementById('badge-existence').innerText = 'STATUS: SYNTHESIZING...';
-      document.getElementById('narrative-content').innerText = 'Querying cognitive context layer & Gemini 2.5 Flash...';
+      const badge = document.getElementById('badge-existence');
+      badge.innerText = 'STATUS: SYNTHESIZING...';
+      badge.style.color = 'var(--ink-faint)';
+      document.getElementById('narrative-content').innerText = 'Querying cognitive context layer, Gemini 2.5 Flash and Tavily web sensors...';
 
       try {
         const res = await fetch('/api/agent/query', {
@@ -509,13 +452,11 @@ The Cognitive Context Layer evaluates GitHub footprints, hackathon scores, commi
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query: q })
         });
+        if (res.status === 401) { window.location.href = '/login'; return; }
         const data = await res.json();
 
-        document.getElementById('badge-existence').innerText = data.exists ? 'STATUS: VERIFIED CANDIDATE' : 'STATUS: NOT FOUND';
-        document.getElementById('badge-existence').className = data.exists 
-          ? 'px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800 font-semibold'
-          : 'px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-red-950 text-red-400 border border-red-800 font-semibold';
-        
+        badge.innerText = data.exists ? 'STATUS: VERIFIED CANDIDATE' : 'STATUS: NOT FOUND';
+        badge.style.color = data.exists ? 'var(--success)' : 'var(--danger)';
         document.getElementById('response-target').innerText = data.target_user ? `@${data.target_user}` : 'AETHER Overview';
         document.getElementById('latency-label').innerText = `${data.latency_ms}ms Latency`;
         document.getElementById('narrative-content').innerText = data.synthesized_response;
@@ -534,18 +475,18 @@ The Cognitive Context Layer evaluates GitHub footprints, hackathon scores, commi
       }
     }
 
-    // Load Builders
     async function loadBuilders() {
       try {
         const res = await fetch('/api/users');
+        if (res.status === 401) { window.location.href = '/login'; return; }
         const data = await res.json();
         ALL_BUILDERS = data.users || [];
         document.getElementById('builder-count-badge').innerText = ALL_BUILDERS.length;
+        document.getElementById('builder-count-mirror').innerText = ALL_BUILDERS.length;
         document.getElementById('indexed-count-text').innerText = `(${ALL_BUILDERS.length})`;
+        document.getElementById('match-pool-hint').innerText = ALL_BUILDERS.length;
         renderBuildersList(ALL_BUILDERS);
-      } catch (err) {
-        console.error('Failed to load builders', err);
-      }
+      } catch (err) { console.error('Failed to load builders', err); }
     }
 
     function renderBuildersList(builders) {
@@ -553,15 +494,15 @@ The Cognitive Context Layer evaluates GitHub footprints, hackathon scores, commi
       container.innerHTML = '';
       builders.slice(0, 50).forEach(u => {
         const div = document.createElement('div');
-        div.className = 'p-3 bg-zinc-900/80 hover:bg-zinc-800/90 border border-zinc-800/80 rounded-xl cursor-pointer transition flex items-center justify-between';
+        div.className = 'builder-row p-3 flex items-center justify-between';
         div.onclick = () => setQuery(`Is ${u.name} in our database? What are their skills?`);
         div.innerHTML = `
           <div>
-            <div class="font-bold text-xs text-white">${u.name}</div>
-            <div class="text-[10px] text-zinc-500 font-mono">@${u.username} &bull; ${u.archetype || 'Fullstack'}</div>
+            <div class="font-semibold text-xs" style="color:var(--ink-strongest)">${u.name}</div>
+            <div class="text-[10px] font-mono" style="color:var(--ink-faint)">@${u.username} &bull; ${u.archetype || 'Fullstack'}</div>
           </div>
           <div class="text-right">
-            <span class="text-xs font-mono font-bold text-emerald-400">${u.reliability_score || 90}%</span>
+            <span class="text-xs font-mono font-bold" style="color:var(--success)">${u.reliability_score || 90}</span>
           </div>
         `;
         container.appendChild(div);
@@ -570,8 +511,8 @@ The Cognitive Context Layer evaluates GitHub footprints, hackathon scores, commi
 
     function filterBuilders(val) {
       const v = val.toLowerCase().trim();
-      const filtered = ALL_BUILDERS.filter(b => 
-        b.name.toLowerCase().includes(v) || 
+      const filtered = ALL_BUILDERS.filter(b =>
+        b.name.toLowerCase().includes(v) ||
         b.username.toLowerCase().includes(v) ||
         (b.archetype && b.archetype.toLowerCase().includes(v)) ||
         (b.skills && b.skills.some(s => s.toLowerCase().includes(v)))
@@ -579,47 +520,51 @@ The Cognitive Context Layer evaluates GitHub footprints, hackathon scores, commi
       renderBuildersList(filtered);
     }
 
-    // Squad Matchmaker
     async function computeSquad() {
       const size = parseInt(document.getElementById('squad-size').value) || 3;
-      const res = await fetch('/api/matchmaking/squad', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target_goal: 'High-Velocity AI Fullstack Project', squad_size: size })
-      });
-      const data = await res.json();
       const container = document.getElementById('squad-result');
-      
-      let membersHtml = data.squad_members.map(m => `
-        <div class="card-surface-raised p-4 space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-sm text-white">${m.name}</span>
-            <span class="text-xs font-mono text-emerald-400 font-bold">${m.reliability_score}/100</span>
-          </div>
-          <div class="text-xs text-amber-400 font-mono font-semibold">${m.role_in_squad}</div>
-          <div class="text-[11px] text-zinc-400">${m.archetype}</div>
-          <div class="text-[10px] text-zinc-500 font-mono pt-1">Skills: ${m.key_skills.join(', ')}</div>
-        </div>
-      `).join('');
+      container.innerHTML = '<div class="card-surface p-8 text-center text-xs font-mono" style="color:var(--ink-faint)">Computing orthogonal complementarity...</div>';
+      try {
+        const res = await fetch('/api/matchmaking/squad', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target_goal: 'High-Velocity AI Fullstack Project', squad_size: size })
+        });
+        if (res.status === 401) { window.location.href = '/login'; return; }
+        const data = await res.json();
 
-      container.innerHTML = `
-        <div class="bg-amber-950/40 border border-amber-800/60 p-4 rounded-xl flex items-center justify-between">
-          <div>
-            <span class="text-xs font-mono text-amber-300 font-bold uppercase">Squad Synergy Score</span>
-            <div class="text-2xl font-extrabold text-amber-400 font-mono">${data.synergy_score}%</div>
+        const membersHtml = data.squad_members.map(m => `
+          <div class="card-surface-raised p-4 space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="font-semibold text-sm" style="color:var(--ink-strongest)">${m.name}</span>
+              <span class="text-xs font-mono font-bold" style="color:var(--success)">${m.reliability_score}/100</span>
+            </div>
+            <div class="text-xs font-mono font-semibold" style="color:var(--accent)">${m.role_in_squad}</div>
+            <div class="text-[11px]" style="color:var(--ink)">${m.archetype}</div>
+            <div class="text-[10px] font-mono pt-1" style="color:var(--ink-faint)">Skills: ${m.key_skills.join(', ')}</div>
           </div>
-          <div class="text-right text-xs text-zinc-400 font-mono">
-            Diversity: ${data.metrics.diversity_score}% &bull; Mean Velocity: ${data.metrics.mean_velocity}
+        `).join('');
+
+        container.innerHTML = `
+          <div class="card-surface-raised p-4 flex items-center justify-between fade-up">
+            <div>
+              <span class="eyebrow font-bold">Squad Synergy Score</span>
+              <div class="text-2xl font-bold font-mono" style="color:var(--accent)">${data.synergy_score}%</div>
+            </div>
+            <div class="text-right text-xs font-mono" style="color:var(--ink-muted)">
+              Diversity: ${data.metrics.diversity_score}% &bull; Mean Velocity: ${data.metrics.mean_velocity}
+            </div>
           </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-${size} gap-4">${membersHtml}</div>
-        <div class="p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-zinc-300 leading-relaxed font-mono">
-          <strong>Architectural Rationale:</strong> ${data.architectural_rationale}
-        </div>
-      `;
+          <div class="grid grid-cols-1 md:grid-cols-${size} gap-4">${membersHtml}</div>
+          <div class="card-surface-raised p-4 text-xs leading-relaxed font-mono fade-up" style="color:var(--ink)">
+            <strong>Architectural Rationale:</strong> ${data.architectural_rationale}
+          </div>
+        `;
+      } catch (err) {
+        container.innerHTML = '<div class="card-surface p-6 text-xs font-mono" style="color:var(--danger)">Matchmaker error.</div>';
+      }
     }
 
-    // Live Cypher Execution
     async function executeCypher() {
       const q = document.getElementById('cypher-input').value.trim();
       const res = await fetch('/api/graph/cypher', {
@@ -627,69 +572,71 @@ The Cognitive Context Layer evaluates GitHub footprints, hackathon scores, commi
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: q })
       });
+      if (res.status === 401) { window.location.href = '/login'; return; }
       const data = await res.json();
-      document.getElementById('cypher-count').innerText = `${data.count} rows returned`;
-      
+      document.getElementById('cypher-count').innerText = `${data.count} rows returned ${data.neo4j_connected ? '(live Aura)' : '(in-memory)'}`;
+
       const container = document.getElementById('cypher-results');
       if (!data.results || data.results.length === 0) {
-        container.innerHTML = '<span class="text-zinc-500">No records returned.</span>';
+        container.innerHTML = '<span class="font-mono text-xs" style="color:var(--ink-faint)">No records returned.</span>';
         return;
       }
       const headers = Object.keys(data.results[0]);
-      let ths = headers.map(h => `<th class="p-2 border-b border-zinc-800 text-zinc-400">${h}</th>`).join('');
-      let trs = data.results.map(r => `
-        <tr class="border-b border-zinc-800/40 hover:bg-zinc-900/50">
-          ${headers.map(h => `<td class="p-2">${r[h] !== null ? r[h] : 'null'}</td>`).join('')}
-        </tr>
+      const ths = headers.map(h => `<th>${h}</th>`).join('');
+      const trs = data.results.map(r => `
+        <tr>${headers.map(h => `<td>${r[h] !== null ? r[h] : 'null'}</td>`).join('')}</tr>
       `).join('');
-      container.innerHTML = `<table class="w-full text-left"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
+      container.innerHTML = `<table class="data w-full"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
     }
 
-    // Bot Simulators
     async function simulateTelegram() {
       const cmd = document.getElementById('tg-cmd').value;
+      document.getElementById('tg-preview').innerText = 'Dispatching to @aether_context_bot...';
       const res = await fetch(`/api/integrations/telegram/simulate?command=${encodeURIComponent(cmd)}`);
+      if (res.status === 401) { window.location.href = '/login'; return; }
       const data = await res.json();
       document.getElementById('tg-preview').innerText = data.bot_response;
     }
 
     async function simulateSlack() {
       const cmd = document.getElementById('slack-cmd').value;
+      document.getElementById('slack-preview').innerText = 'Generating Block Kit payload...';
       const res = await fetch(`/api/integrations/slack/simulate?text=${encodeURIComponent(cmd)}`);
+      if (res.status === 401) { window.location.href = '/login'; return; }
       const data = await res.json();
       document.getElementById('slack-preview').innerText = JSON.stringify(data, null, 2);
     }
 
-    // GitHub Webhook Trigger
     async function triggerWebhook() {
-      const payload = JSON.parse(document.getElementById('webhook-payload').value);
+      let payload;
+      try { payload = JSON.parse(document.getElementById('webhook-payload').value); }
+      catch (e) { document.getElementById('webhook-log').innerText = '[ERROR] Invalid JSON payload.'; return; }
       const res = await fetch('/webhooks/github', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-GitHub-Event': 'push' },
         body: JSON.stringify(payload)
       });
       const data = await res.json();
-      document.getElementById('webhook-log').innerText = `[SUCCESS] Ingested ${data.commit_count} commits into context pipeline for @${data.sender}\n${JSON.stringify(data, null, 2)}`;
+      document.getElementById('webhook-log').innerText =
+        `[SUCCESS] Ingested ${data.commit_count} commits for @${data.sender} on ${data.repo}\n${data.message}\n${JSON.stringify(data, null, 2)}`;
     }
 
-    // Load Audit Logs
     async function loadAuditLogs() {
       const res = await fetch('/api/audit/logs?limit=25');
+      if (res.status === 401) { window.location.href = '/login'; return; }
       const data = await res.json();
-      const tbody = document.getElementById('audit-tbody');
-      tbody.innerHTML = (data.audit_logs || []).map(l => `
-        <tr class="hover:bg-zinc-900/40">
-          <td class="py-2 px-3 text-zinc-500">${l.id}</td>
-          <td class="py-2 px-3 text-zinc-400 text-[11px]">${l.timestamp}</td>
-          <td class="py-2 px-3 font-bold text-white">${l.target_user || 'None'}</td>
-          <td class="py-2 px-3"><span class="px-2 py-0.5 rounded text-[10px] ${l.exists_result ? 'bg-emerald-950 text-emerald-400' : 'bg-zinc-800 text-zinc-400'}">${l.exists_result ? 'TRUE' : 'FALSE'}</span></td>
-          <td class="py-2 px-3 text-amber-400">${l.latency_ms}ms</td>
-          <td class="py-2 px-3 text-zinc-300 truncate max-w-xs">${l.query}</td>
+      document.getElementById('audit-tbody').innerHTML = (data.audit_logs || []).map(l => `
+        <tr>
+          <td style="color:var(--ink-faint)">${l.id}</td>
+          <td style="color:var(--ink-faint)">${l.timestamp}</td>
+          <td style="color:var(--ink-strongest);font-weight:600">${l.target_user || 'None'}</td>
+          <td><span style="color:${l.exists_result ? 'var(--success)' : 'var(--danger)'};font-weight:600">${l.exists_result ? 'TRUE' : 'FALSE'}</span></td>
+          <td style="color:var(--accent)">${l.latency_ms}ms</td>
+          <td class="truncate max-w-xs" style="color:var(--ink)">${l.query}</td>
         </tr>
       `).join('');
     }
 
-    // Canvas Graph Renderer
     let canvas, ctx;
     async function renderGraph() {
       canvas = document.getElementById('graphCanvas');
@@ -698,46 +645,49 @@ The Cognitive Context Layer evaluates GitHub footprints, hackathon scores, commi
       canvas.height = canvas.parentElement.clientHeight;
 
       const res = await fetch('/api/graph/topology');
+      if (res.status === 401) { window.location.href = '/login'; return; }
       const data = await res.json();
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
       const nodes = data.nodes || [];
       const edges = data.edges || [];
 
-      // Draw edges
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const nodeMap = {};
+      nodes.forEach(n => nodeMap[n.id] = n);
+
+      ctx.strokeStyle = 'rgba(38, 35, 35, 0.10)';
       ctx.lineWidth = 1;
       edges.forEach(e => {
-        const source = nodes.find(n => n.id === e.source);
-        const target = nodes.find(n => n.id === e.target);
-        if (source && target) {
+        const s = nodeMap[e.source], t = nodeMap[e.target];
+        if (s && t) {
           ctx.beginPath();
-          ctx.moveTo(source.position.x, source.position.y);
-          ctx.lineTo(target.position.x, target.position.y);
+          ctx.moveTo(s.position.x, s.position.y);
+          ctx.lineTo(t.position.x, t.position.y);
           ctx.stroke();
         }
       });
 
-      // Draw nodes
+      const showUserLabels = nodes.length < 220;
       nodes.forEach(n => {
-        ctx.beginPath();
         const r = n.label === 'Archetype' ? 14 : (n.label === 'User' ? 10 : 7);
+        ctx.beginPath();
         ctx.arc(n.position.x, n.position.y, r, 0, 2 * Math.PI);
-        ctx.fillStyle = n.label === 'Archetype' ? '#10b981' : (n.label === 'User' ? '#f59e0b' : '#06b6d4');
+        ctx.fillStyle = n.label === 'Archetype' ? '#a76451' : (n.label === 'User' ? '#202020' : '#1a7f37');
         ctx.fill();
-
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '10px JetBrains Mono';
-        ctx.fillText(n.data.label, n.position.x + r + 4, n.position.y + 3);
+        if (n.label !== 'User' || showUserLabels) {
+          ctx.fillStyle = 'rgba(38, 35, 35, 0.72)';
+          ctx.font = '10px IBM Plex Mono';
+          ctx.fillText(n.data.label, n.position.x + r + 4, n.position.y + 3);
+        }
       });
     }
 
-    function refreshGraph() {
-      renderGraph();
-    }
+    function refreshGraph() { renderGraph(); }
 
-    // Init
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
+      const meRes = await fetch('/api/auth/me');
+      const me = await meRes.json();
+      if (!me.authenticated) { window.location.href = '/login'; return; }
+      document.getElementById('nav-user-label').innerText = me.email || '';
       loadBuilders();
       connectWebSocket();
       computeSquad();

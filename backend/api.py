@@ -4,8 +4,9 @@ Exposes the Universal Context Layer via Conversational Agent,
 Existence Checks, Neo4j Graph Topology, and Matchmaking Services.
 """
 
-from fastapi import FastAPI, Query, HTTPException, WebSocket, WebSocketDisconnect, Request
+from fastapi import FastAPI, Query, HTTPException, WebSocket, WebSocketDisconnect, Request, Response, BackgroundTasks, Cookie
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse, JSONResponse
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 
@@ -13,9 +14,11 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pathlib import Path
 
+import os
 import time
 import re
 from backend.config import settings
+from backend import auth as aether_auth
 from backend.database.raw_seed import RAW_USERS, RAW_OPPORTUNITIES
 from backend.database.db import get_all_synthesized_profiles, log_audit, get_audit_logs
 from backend.engine.synthesis import synthesizer
@@ -46,10 +49,17 @@ def serve_root():
 @app.get("/app")
 @app.get("/command-center")
 def serve_command_center():
+    return serve_command_page()
+
+def serve_command_page():
     index_file = static_dir / "index.html"
     if index_file.exists():
         return FileResponse(str(index_file))
     return {"status": "AETHER Command Center Online"}
+
+@app.get("/command")
+def serve_command(request: Request):
+    return serve_command_page()
 
 @app.get("/login")
 def serve_login():
@@ -67,44 +77,109 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Authentication Layer (Demo & Production Roles)
-DEMO_ACCOUNTS = {
-    "admin@nexus.dev": {
-        "password": "admin123",
-        "name": "Alex Vance (Hackathon Organizer)",
-        "role": "organizer",
-        "token": "tok_organizer_998124"
-    },
-    "shiv@nexus.dev": {
-        "password": "builder123",
-        "name": "Shiv Sharma",
-        "role": "builder",
-        "token": "tok_builder_112048"
-    }
-}
+# ==============================================================================
+# Authentication Layer (cookie sessions, env-provisioned operator accounts)
+# ==============================================================================
 
 class LoginRequest(BaseModel):
     email: str
     password: str
 
 @app.post("/api/auth/login")
-def login(req: LoginRequest):
-    acc = DEMO_ACCOUNTS.get(req.email.lower())
-    if not acc or acc["password"] != req.password:
-        raise HTTPException(status_code=401, detail="Invalid email or password. Use demo credentials.")
-    return {
-        "token": acc["token"],
-        "name": acc["name"],
-        "role": acc["role"],
-        "email": req.email
-    }
+def login(req: LoginRequest, response: Response):
+    user = aether_auth.authenticate(req.email, req.password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or access key.")
+    token = aether_auth.issue_token(user["email"])
+    response.set_cookie(
+        aether_auth.SESSION_COOKIE, token,
+        max_age=aether_auth.SESSION_TTL_SECONDS,
+        httponly=True, samesite="lax", path="/"
+    )
+    return {"authenticated": True, "email": user["email"], "name": user["name"], "role": user["role"]}
+
+@app.post("/api/auth/logout")
+def logout(response: Response):
+    response.delete_cookie(aether_auth.SESSION_COOKIE, path="/")
+    return {"authenticated": False}
 
 @app.get("/api/auth/me")
-def get_current_user(token: Optional[str] = Query(None)):
-    for email, acc in DEMO_ACCOUNTS.items():
-        if acc["token"] == token:
-            return {"authenticated": True, "user": acc, "email": email}
+def get_current_user(
+    aether_session: Optional[str] = Cookie(None),
+    token: Optional[str] = Query(None)
+):
+    email = aether_auth.verify_token(aether_session) or aether_auth.verify_token(token)
+    if email:
+        acc = aether_auth.get_accounts().get(email, {})
+        return {"authenticated": True, "email": email, "user": acc, "role": acc.get("role", "organizer")}
     return {"authenticated": False, "role": "guest"}
+
+# ==============================================================================
+# Route Protection Middleware
+# Public: landing, login page, static assets, health, stats, auth, external webhooks, WS.
+# Protected pages (/command*) redirect to /login. Protected APIs return 401 JSON.
+# ==============================================================================
+
+PUBLIC_PREFIXES = (
+    "/static", "/api/health", "/api/auth/", "/api/stats",
+    "/webhooks/", "/api/integrations/telegram/webhook",
+    "/api/integrations/slack/webhook", "/docs", "/openapi.json",
+)
+PROTECTED_PAGE_PATHS = ("/command", "/app", "/command-center")
+
+@app.middleware("http")
+async def auth_middleware(request: Request, call_next):
+    path = request.url.path
+
+    if path == "/" or path == "/login" or path == "/ws" or path.startswith(PUBLIC_PREFIXES) or path.startswith("/ws/"):
+        return await call_next(request)
+
+    session_token = request.cookies.get(aether_auth.SESSION_COOKIE)
+    if not session_token:
+        auth_header = request.headers.get("authorization", "")
+        if auth_header.lower().startswith("bearer "):
+            session_token = auth_header[7:].strip()
+    if not session_token:
+        session_token = request.query_params.get("token")
+
+    email = aether_auth.verify_token(session_token)
+
+    if path.startswith(PROTECTED_PAGE_PATHS):
+        if not email:
+            return RedirectResponse(url="/login", status_code=307)
+        return await call_next(request)
+
+    if path.startswith("/api"):
+        if not email:
+            return JSONResponse(status_code=401, content={"detail": "Authentication required. Sign in via /login."})
+        return await call_next(request)
+
+    return await call_next(request)
+
+@app.get("/api/stats")
+def public_stats():
+    """Public aggregate telemetry for the landing page and health probes. No PII."""
+    archetypes = {}
+    skill_counts = {}
+    for u in SYNTHESIZED_PROFILES:
+        archetypes[u["archetype"]] = archetypes.get(u["archetype"], 0) + 1
+        for s in u.get("skills", [])[:6]:
+            skill_counts[s] = skill_counts.get(s, 0) + 1
+    top_builders = sorted(
+        SYNTHESIZED_PROFILES, key=lambda u: u.get("reliability_score", 0), reverse=True
+    )[:5]
+    return {
+        "users_indexed": len(SYNTHESIZED_PROFILES),
+        "archetypes": archetypes,
+        "top_skills": sorted(skill_counts.items(), key=lambda kv: kv[1], reverse=True)[:14],
+        "top_builders": [
+            {"name": u["name"], "archetype": u["archetype"], "reliability_score": u["reliability_score"]}
+            for u in top_builders
+        ],
+        "neo4j_connected": graph_store.neo4j_connected,
+        "tavily_configured": bool(settings.TAVILY_API_KEY),
+        "llm_configured": bool(settings.GEMINI_API_KEY or settings.GROQ_API_KEY or settings.OPENAI_API_KEY)
+    }
 
 # Global synthesized cache & matchmaker initialized immediately from SQLite persistent DB
 SYNTHESIZED_PROFILES: List[Dict[str, Any]] = get_all_synthesized_profiles()
@@ -447,10 +522,11 @@ async def websocket_graph_endpoint(websocket: WebSocket):
         ws_manager.disconnect(websocket)
 
 @app.post("/webhooks/github")
-async def handle_github_webhook(request: Request):
+async def handle_github_webhook(request: Request, background_tasks: BackgroundTasks):
     """
     GitHub Webhook Ingestor:
     Auto-indexes push events, PR reviews, and repo stars directly into AETHER Context Layer.
+    Commit digests are cognified into Cognee semantic memory in a background task (real pipeline).
     """
     try:
         payload = await request.json()
@@ -476,6 +552,12 @@ async def handle_github_webhook(request: Request):
         "timestamp": time.time()
     })
 
+    cognee_status: Dict[str, Any] = {"engine": "cognee", "status": "queued"}
+    if ENABLE_COGNEE:
+        import threading
+        threading.Thread(target=_cognee_ingest_task, args=(event, sender, repo, commits, cognee_status), daemon=True).start()
+        cognee_status = {"engine": "cognee", "status": "processing_in_background"}
+
     return {
         "status": "ingested",
         "event": event,
@@ -483,8 +565,20 @@ async def handle_github_webhook(request: Request):
         "sender": sender,
         "commit_count": commit_count,
         "context_status": "synced_to_sqlite_and_neo4j",
+        "cognee": cognee_status,
         "message": f"Successfully ingested {commit_count} commits into AETHER context pipeline."
     }
+
+ENABLE_COGNEE = os.getenv("ENABLE_COGNEE", "true").lower() == "true"
+
+def _cognee_ingest_task(event: str, sender: str, repo: str, commits: list, status_ref: dict):
+    """Background task: cognify the push digest into Cognee semantic memory."""
+    from backend.engine.cognee_pipeline import run_ingestion_background
+    result = run_ingestion_background(event, sender, repo, commits)
+    log_audit(
+        f"Cognee cognify: {repo} by @{sender} -> {result.get('status', 'unknown')}",
+        sender, result.get("status") == "cognified", 0.0
+    )
 
 @app.post("/api/integrations/telegram/webhook")
 async def handle_telegram_webhook(request: Request):
