@@ -24,6 +24,11 @@ def test_health_check():
 def test_root_serves_html():
     res = client.get("/")
     assert res.status_code == 200
+    assert "AETHER" in res.text
+
+def test_app_serves_command_center():
+    res = client.get("/app")
+    assert res.status_code == 200
     assert "AETHER // Universal Context Layer" in res.text
 
 def test_user_existence_check_found():
@@ -84,6 +89,7 @@ if __name__ == "__main__":
     print("Running integration tests...")
     test_health_check()
     test_root_serves_html()
+    test_app_serves_command_center()
     test_user_existence_check_found()
     test_user_existence_check_not_found()
     test_agent_conversational_query_existence()

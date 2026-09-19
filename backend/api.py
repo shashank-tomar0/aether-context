@@ -32,10 +32,21 @@ if static_dir.exists():
 
 @app.get("/")
 def serve_root():
+    landing_file = static_dir / "cloned_cofounder.html"
+    if landing_file.exists():
+        return FileResponse(str(landing_file))
     index_file = static_dir / "index.html"
     if index_file.exists():
         return FileResponse(str(index_file))
     return {"status": "AETHER Context Engine Online"}
+
+@app.get("/app")
+@app.get("/command-center")
+def serve_command_center():
+    index_file = static_dir / "index.html"
+    if index_file.exists():
+        return FileResponse(str(index_file))
+    return {"status": "AETHER Command Center Online"}
 
 # CORS configuration for Next.js frontend
 app.add_middleware(
