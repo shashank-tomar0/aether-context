@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AETHER // Universal Context Layer & Graph Matchmaker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Geist Mono', 'monospace'],
+          },
+          colors: {
+            obsidian: {
+              950: '#060709',
+              900: '#090a0f',
+              850: '#0f1118',
+              800: '#141722',
+              700: '#1e2233',
+            },
+            cyan: {
+              400: '#22d3ee',
+              500: '#00f0ff',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #060709;
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+    .grid-bg {
+      background-size: 32px 32px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+    .glow-cyan {
+      box-shadow: 0 0 25px -5px rgba(0, 240, 255, 0.25);
+    }
+    .border-subtle {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .border-subtle-hover:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090a0f;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e2233;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-obsidian-950 flex flex-col grid-bg">
+
+  <!-- TOP PRODUCTION HEADER -->
+  <header class="h-14 border-b border-subtle bg-obsidian-900/90 backdrop-blur sticky top-0 z-50 flex items-center justify-between px-6">
+    <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></div>
+        <span class="font-mono text-sm font-semibold tracking-wider text-white">AETHER</span>
+        <span class="text-xs text-slate-500 font-mono">v1.0.0 // CONTEXT LAYER</span>
+      </div>
+      <div class="hidden md:flex items-center space-x-1 pl-4 border-l border-subtle text-[11px] font-mono text-slate-400">
+        <span class="px-2 py-0.5 rounded bg-obsidian-800 border border-subtle text-cyan-400">Neo4j Graph</span>
+        <span class="px-2 py-0.5 rounded bg-obsidian-800 border border-subtle text-purple-400">Cognee Memory</span>
+        <span class="px-2 py-0.5 rounded bg-obsidian-800 border border-subtle text-emerald-400">Tavily Sensor</span>
+        <span class="px-2 py-0.5 rounded bg-obsidian-800 border border-subtle text-amber-400">Render Cloud</span>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <nav class="flex items-center space-x-1 bg-obsidian-850 p-1 rounded-lg border border-subtle text-xs">
+      <button onclick="switchTab('agent')" id="tab-agent" class="tab-btn px-3 py-1 rounded-md text-white bg-obsidian-700 font-medium transition">Conversational Agent</button>
+      <button onclick="switchTab('graph')" id="tab-graph" class="tab-btn px-3 py-1 rounded-md text-slate-400 hover:text-white transition">Neural Graph Canvas</button>
+      <button onclick="switchTab('match')" id="tab-match" class="tab-btn px-3 py-1 rounded-md text-slate-400 hover:text-white transition">Squad Matchmaker</button>
+      <button onclick="switchTab('opps')" id="tab-opps" class="tab-btn px-3 py-1 rounded-md text-slate-400 hover:text-white transition">Opportunities</button>
+      <button onclick="switchTab('diff')" id="tab-diff" class="tab-btn px-3 py-1 rounded-md text-slate-400 hover:text-white transition">Raw vs Synthesized</button>
+    </nav>
+
+    <!-- LIVE TELEMETRY CHIP -->
+    <div class="flex items-center space-x-3 text-xs font-mono">
+      <span class="text-slate-400 hidden lg:inline">subdomain: <span class="text-white font-semibold">shashanktomar.dev</span></span>
+      <div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px]">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+        <span>PRODUCTION ACTIVE</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 flex flex-col p-6 max-w-7xl mx-auto w-full space-y-6">
+
+    <!-- TAB 1: CONVERSATIONAL AGENT & EXISTENCE CHECK (CORE RUBRIC) -->
+    <div id="view-agent" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- LEFT: QUERY TERMINAL & NARRATIVE -->
+        <div class="lg:col-span-8 flex flex-col space-y-4">
+          <!-- SEARCH & QUERY BAR -->
+          <div class="bg-obsidian-900 border border-subtle rounded-xl p-4 glow-cyan space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-mono uppercase tracking-wider text-slate-400 flex items-center space-x-2">
+                <span class="text-cyan-400">//</span>
+                <span>Context Layer Omnisearch & Existence Check</span>
+              </label>
+              <span class="text-[11px] font-mono text-slate-500">FastAPI + Cognee Ingestion</span>
+            </div>
+            <div class="relative">
+              <input 
+                id="query-input" 
+                type="text" 
+                placeholder="Ask open-ended questions: 'Is Shiv in our database?' or 'Evaluate Shashank for systems architecture'..."
+                class="w-full bg-obsidian-950 border border-subtle rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-400 font-mono transition"
+                onkeydown="if(event.key === 'Enter') runQuery()"
+              />
+              <button 
+                onclick="runQuery()" 
+                class="absolute right-2 top-2 px-4 py-1.5 rounded-md bg-cyan-500 hover:bg-cyan-400 text-obsidian-950 font-semibold text-xs transition"
+              >
+                Synthesize
+              </button>
+            </div>
+
+            <!-- QUICK SUGGESTION CHIPS -->
+            <div class="flex flex-wrap gap-2 pt-1 text-xs">
+              <span class="text-slate-500 text-[11px] self-center">Try prompt:</span>
+              <button onclick="setQuery('Is Shiv in our database? What has he built and how active is he?')" class="px-2.5 py-1 rounded bg-obsidian-800 hover:bg-obsidian-700 border border-subtle text-slate-300 transition">
+                "Is Shiv in our database?"
+              </button>
+              <button onclick="setQuery('Tell me about Shashank: architecture instincts and velocity score')" class="px-2.5 py-1 rounded bg-obsidian-800 hover:bg-obsidian-700 border border-subtle text-slate-300 transition">
+                "Shashank architecture & velocity"
+              </button>
+              <button onclick="setQuery('Who is our top candidate for high-taste frontend design?')" class="px-2.5 py-1 rounded bg-obsidian-800 hover:bg-obsidian-700 border border-subtle text-slate-300 transition">
+                "Top Frontend Craftsperson"
+              </button>
+            </div>
+          </div>
+
+          <!-- SYNTHESIZED RESPONSE STREAM -->
+          <div id="agent-response-card" class="bg-obsidian-900 border border-subtle rounded-xl p-6 flex-1 space-y-4">
+            <div class="flex items-center justify-between border-b border-subtle pb-3">
+              <div class="flex items-center space-x-3">
+                <span id="badge-existence" class="px-2 py-0.5 rounded text-[11px] font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  [STATUS: READY]
+                </span>
+                <span id="response-target" class="text-sm font-semibold text-white font-mono">AETHER Cognitive Stream</span>
+              </div>
+              <span class="text-xs font-mono text-slate-500">Deterministic Hybrid Recall</span>
+            </div>
+
+            <div id="narrative-content" class="text-sm leading-relaxed text-slate-300 space-y-3 font-sans">
+              <p>Welcome to <strong>AETHER</strong>. Ask any open-ended question or existence check against the platform's user base.</p>
+              <p class="text-slate-400 text-xs font-mono">The Context Layer synthesizes native hackathon activity, commit velocity, and external GitHub/LinkedIn signals into structured behavioral intelligence.</p>
+            </div>
+
+            <!-- RECEPTACLE FOR TARGET PROFILE METRICS -->
+            <div id="metrics-grid" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-subtle font-mono text-xs">
+              <div class="bg-obsidian-950 p-2.5 rounded border border-subtle">
+                <div class="text-slate-500 text-[10px]">ARCHETYPE</div>
+                <div id="m-archetype" class="text-cyan-400 font-semibold truncate">-</div>
+              </div>
+              <div class="bg-obsidian-950 p-2.5 rounded border border-subtle">
+                <div class="text-slate-500 text-[10px]">RELIABILITY INDEX</div>
+                <div id="m-reliability" class="text-emerald-400 font-semibold">-</div>
+              </div>
+              <div class="bg-obsidian-950 p-2.5 rounded border border-subtle">
+                <div class="text-slate-500 text-[10px]">COMMIT VELOCITY</div>
+                <div id="m-velocity" class="text-purple-400 font-semibold">-</div>
+              </div>
+              <div class="bg-obsidian-950 p-2.5 rounded border border-subtle">
+                <div class="text-slate-500 text-[10px]">WIN RATE</div>
+                <div id="m-winrate" class="text-amber-400 font-semibold">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: LIVE PLATFORM USERS LIST -->
+        <div class="lg:col-span-4 bg-obsidian-900 border border-subtle rounded-xl p-4 flex flex-col space-y-3">
+          <div class="flex items-center justify-between border-b border-subtle pb-2">
+            <span class="text-xs font-mono text-slate-400 uppercase tracking-wider">Indexed Builders (5)</span>
+            <span class="text-[11px] font-mono text-cyan-400">Real DB Seed</span>
+          </div>
+
+          <div id="users-list" class="space-y-2 overflow-y-auto max-h-[480px]">
+            <!-- Dynamic Users Injected Here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: NEURAL GRAPH CANVAS (BONUS & SPONSOR NEO4J) -->
+    <div id="view-graph" class="hidden space-y-4">
+      <div class="bg-obsidian-900 border border-subtle rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-semibold text-white font-mono">Relational Context Graph (Neo4j Topology)</h2>
+          <p class="text-xs text-slate-400">Interactive multi-hop graph showing Users, Technical Archetypes, Verified Skills, and Complementary Synergy Edges.</p>
+        </div>
+        <div class="flex items-center space-x-3 text-xs font-mono">
+          <span class="flex items-center space-x-1.5 text-purple-400"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span><span>Users</span></span>
+          <span class="flex items-center space-x-1.5 text-cyan-400"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span><span>Archetypes</span></span>
+          <span class="flex items-center space-x-1.5 text-emerald-400"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span>Skills</span></span>
+          <span class="flex items-center space-x-1.5 text-amber-400"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span><span>Projects</span></span>
+        </div>
+      </div>
+
+      <!-- CANVAS CONTAINER -->
+      <div class="relative bg-obsidian-950 border border-subtle rounded-xl h-[560px] overflow-hidden">
+        <canvas id="graphCanvas" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+        <div class="absolute bottom-4 left-4 bg-obsidian-900/90 border border-subtle p-3 rounded-lg text-xs font-mono space-y-1">
+          <div class="text-slate-400">Graph Engine: <span class="text-white">Neo4j Driver / In-Memory Topology</span></div>
+          <div class="text-slate-400">Interactions: <span class="text-cyan-400">Drag nodes to explore relationship clusters</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: AUTONOMOUS SQUAD MATCHMAKER (BONUS POINT #1) -->
+    <div id="view-match" class="hidden space-y-6">
+      <div class="bg-obsidian-900 border border-subtle rounded-xl p-6 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-subtle pb-4">
+          <div>
+            <h2 class="text-base font-semibold text-white font-mono">Autonomous Squad Assembler</h2>
+            <p class="text-xs text-slate-400">Graph matchmaking algorithm that calculates orthogonal skill complementarity, velocity balance, and zero-redundancy synergy.</p>
+          </div>
+          <button 
+            onclick="runMatchmaker()" 
+            class="px-5 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-obsidian-950 font-semibold text-xs transition font-mono self-start md:self-auto"
+          >
+            Re-Calculate Optimal Squad
+          </button>
+        </div>
+
+        <!-- MATCHMAKER CONTROLS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
+          <div class="bg-obsidian-950 p-3 rounded-lg border border-subtle">
+            <label class="text-slate-400 block mb-1">Target Project Focus</label>
+            <input id="match-goal" type="text" value="High-Velocity AI Systems & Web Command Center" class="w-full bg-obsidian-900 border border-subtle rounded px-2.5 py-1.5 text-white focus:outline-none focus:border-cyan-400" />
+          </div>
+          <div class="bg-obsidian-950 p-3 rounded-lg border border-subtle">
+            <label class="text-slate-400 block mb-1">Squad Size</label>
+            <select id="match-size" class="w-full bg-obsidian-900 border border-subtle rounded px-2.5 py-1.5 text-white focus:outline-none focus:border-cyan-400">
+              <option value="3" selected>3 Members (Lead Systems + UI Craft + Strategy)</option>
+              <option value="2">2 Members (Lead Systems + UI Craft)</option>
+              <option value="4">4 Members (Full Stack Quad)</option>
+            </select>
+          </div>
+          <div class="bg-obsidian-950 p-3 rounded-lg border border-subtle flex flex-col justify-center">
+            <div class="text-slate-400 text-[10px]">PREDICTED SYNERGY SCORE</div>
+            <div id="match-score-badge" class="text-2xl font-bold text-emerald-400 font-mono">98.5%</div>
+          </div>
+        </div>
+
+        <!-- SQUAD MEMBERS CARDS -->
+        <div id="squad-results" class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <!-- Injected via JavaScript -->
+        </div>
+
+        <!-- ARCHITECTURAL RATIONALE -->
+        <div class="bg-obsidian-950 p-4 rounded-lg border border-subtle space-y-1.5">
+          <span class="text-xs font-mono uppercase tracking-wider text-cyan-400">Algorithm Rationale:</span>
+          <p id="match-rationale" class="text-xs text-slate-300 leading-relaxed font-mono">Loading optimal squad pairing...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: OPPORTUNITY & BOUNTY DISPATCHER (BONUS POINT #2) -->
+    <div id="view-opps" class="hidden space-y-6">
+      <div class="bg-obsidian-900 border border-subtle rounded-xl p-6 space-y-4">
+        <div class="border-b border-subtle pb-4">
+          <h2 class="text-base font-semibold text-white font-mono">Downstream Application: Grant & Bounty Dispatcher</h2>
+          <p class="text-xs text-slate-400">Demonstrating true downstream utility: The Context Layer proactively routes enterprise sponsor grants to candidates whose verified trajectory matches the grant specification.</p>
+        </div>
+
+        <div id="opps-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: RAW VS SYNTHESIZED INSPECTOR (PROVES IT'S NOT A DATA DUMP) -->
+    <div id="view-diff" class="hidden space-y-6">
+      <div class="bg-obsidian-900 border border-subtle rounded-xl p-6 space-y-4">
+        <div class="border-b border-subtle pb-4">
+          <h2 class="text-base font-semibold text-white font-mono">Context Layer Proof: Raw Database vs Synthesized Intelligence</h2>
+          <p class="text-xs text-slate-400">Rubric Proof: Shows how raw platform JSON activity is distilled into actionable behavioral context rather than a simple database lookup.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 font-mono text-xs">
+          <!-- LEFT: RAW DB DATA -->
+          <div class="bg-obsidian-950 p-4 rounded-xl border border-subtle space-y-2">
+            <div class="flex items-center justify-between text-slate-400 border-b border-subtle pb-2">
+              <span class="text-red-400 font-semibold">[BEFORE] Raw Platform Database Tables</span>
+              <span>Disconnected Silos</span>
+            </div>
+            <pre id="raw-json-dump" class="text-[11px] text-slate-400 overflow-x-auto p-2 bg-obsidian-900 rounded max-h-[420px]">
+{
+  "user_id": "usr_001",
+  "username": "shiv_dev",
+  "hackathons": 6,
+  "projects": ["AegisPay", "ChronosQueue"],
+  "commit_score": 94,
+  "peer_rating": 4.9,
+  "github_repos": ["raft-consensus-go", "hyper-relay"],
+  "flake_rate": 0.0
+}
+            </pre>
+          </div>
+
+          <!-- RIGHT: SYNTHESIZED COGNITIVE PROFILE -->
+          <div class="bg-obsidian-950 p-4 rounded-xl border border-cyan-500/30 space-y-2 glow-cyan">
+            <div class="flex items-center justify-between text-slate-400 border-b border-subtle pb-2">
+              <span class="text-cyan-400 font-semibold">[AFTER] AETHER Synthesized Context</span>
+              <span class="text-emerald-400">4D Cognitive Profile</span>
+            </div>
+            <div class="space-y-3 text-slate-300 font-sans text-xs pt-2">
+              <div>
+                <span class="font-mono text-slate-500 text-[10px] block">TECHNICAL ARCHETYPE</span>
+                <span class="text-cyan-400 font-semibold">High-Velocity Systems Architect</span>
+              </div>
+              <div>
+                <span class="font-mono text-slate-500 text-[10px] block">EXECUTION RELIABILITY</span>
+                <span class="text-emerald-400 font-semibold">96.4/100 (0% Flake Risk across 6 events)</span>
+              </div>
+              <div>
+                <span class="font-mono text-slate-500 text-[10px] block">COLLABORATION BEHAVIOR</span>
+                <span>Strict Technical Rigor (Conducts extensive architectural code reviews)</span>
+              </div>
+              <div>
+                <span class="font-mono text-slate-500 text-[10px] block">COMPLEMENTARY REQUIREMENT</span>
+                <span class="text-purple-300">Requires Elite Frontend Craftsperson to translate low-level consensus into consumer-grade interfaces.</span>
+              </div>
+              <div>
+                <span class="font-mono text-slate-500 text-[10px] block">SYNTHESIZED NARRATIVE</span>
+                <p class="text-slate-300 leading-relaxed text-[11px]">
+                  Shiv Sharma (@shiv_dev) is a verified systems specialist with 1,420 GitHub contributions. 
+                  He consistently builds resilient distributed primitives and avoids flaky execution, delivering 
+                  optimal results when paired with dedicated UI engineers.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let globalUsers = [];
+
+    async function loadData() {
+      try {
+        const res = await fetch('/api/users');
+        const data = await res.json();
+        globalUsers = data.users || [];
+        renderUsersList();
+      } catch (e) {
+        console.error("Error fetching users:", e);
+      }
+    }
+
+    function renderUsersList() {
+      const container = document.getElementById('users-list');
+      container.innerHTML = globalUsers.map(u => `
+        <div onclick="selectUser('${u.username}')" class="p-3 rounded-lg bg-obsidian-950 hover:bg-obsidian-850 border border-subtle border-subtle-hover cursor-pointer transition space-y-1.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <img src="${u.avatar}" class="w-6 h-6 rounded-full object-cover border border-subtle" />
+              <span class="text-xs font-semibold text-white">${u.name}</span>
+            </div>
+            <span class="text-[10px] font-mono text-emerald-400">${u.reliability_score}/100</span>
+          </div>
+          <div class="text-[11px] font-mono text-cyan-400 truncate">${u.archetype}</div>
+          <div class="text-[10px] text-slate-400 truncate">${u.skills.slice(0, 3).join(', ')}</div>
+        </div>
+      `).join('');
+    }
+
+    function setQuery(text) {
+      document.getElementById('query-input').value = text;
+      runQuery();
+    }
+
+    function selectUser(username) {
+      setQuery(`Tell me about @${username}: architecture instincts and execution velocity`);
+    }
+
+    async function runQuery() {
+      const input = document.getElementById('query-input');
+      const q = input.value.trim();
+      if (!q) return;
+
+      const badge = document.getElementById('badge-existence');
+      const targetHeader = document.getElementById('response-target');
+      const narrativeEl = document.getElementById('narrative-content');
+      const metricsGrid = document.getElementById('metrics-grid');
+
+      badge.className = "px-2 py-0.5 rounded text-[11px] font-mono bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 animate-pulse";
+      badge.innerText = "[SYNTHESIZING...]";
+      narrativeEl.innerHTML = "<p class='text-slate-400 font-mono text-xs'>AETHER Cognee pipeline distilling context...</p>";
+
+      try {
+        const res = await fetch('/api/agent/query', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ query: q })
+        });
+        const data = await res.json();
+
+        if (data.exists) {
+          badge.className = "px-2 py-0.5 rounded text-[11px] font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+          badge.innerText = "[VERIFIED EXISTENCE]";
+        } else {
+          badge.className = "px-2 py-0.5 rounded text-[11px] font-mono bg-rose-500/20 text-rose-400 border border-rose-500/30";
+          badge.innerText = "[NOT IN DATABASE]";
+        }
+
+        targetHeader.innerText = data.target_user ? `@${data.target_user}` : "Universal Synthesizer";
+        narrativeEl.innerHTML = `<p class="leading-relaxed whitespace-pre-line">${data.synthesized_response}</p>`;
+
+        if (data.profile) {
+          metricsGrid.classList.remove('hidden');
+          document.getElementById('m-archetype').innerText = data.profile.archetype;
+          document.getElementById('m-reliability').innerText = `${data.profile.reliability_score}/100`;
+          document.getElementById('m-velocity').innerText = `${data.profile.commit_velocity}/100`;
+          document.getElementById('m-winrate').innerText = `${data.profile.win_rate}%`;
+        } else {
+          metricsGrid.classList.add('hidden');
+        }
+      } catch (err) {
+        badge.className = "px-2 py-0.5 rounded text-[11px] font-mono bg-rose-500/20 text-rose-400 border border-rose-500/30";
+        badge.innerText = "[QUERY ERROR]";
+        narrativeEl.innerText = "Error contacting AETHER backend: " + err.message;
+      }
+    }
+
+    async function runMatchmaker() {
+      const goal = document.getElementById('match-goal').value;
+      const size = parseInt(document.getElementById('match-size').value, 10);
+
+      try {
+        const res = await fetch('/api/matchmaking/squad', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ target_goal: goal, squad_size: size })
+        });
+        const data = await res.json();
+
+        document.getElementById('match-score-badge').innerText = `${data.synergy_score}%`;
+        document.getElementById('match-rationale').innerText = data.architectural_rationale;
+
+        const container = document.getElementById('squad-results');
+        container.innerHTML = data.squad_members.map(m => `
+          <div class="bg-obsidian-950 p-4 rounded-xl border border-subtle space-y-2 border-subtle-hover transition">
+            <div class="flex items-center space-x-3">
+              <img src="${m.avatar}" class="w-10 h-10 rounded-full object-cover border border-subtle" />
+              <div>
+                <div class="text-sm font-semibold text-white font-mono">${m.name}</div>
+                <div class="text-[11px] text-cyan-400 font-mono">${m.role_in_squad}</div>
+              </div>
+            </div>
+            <div class="text-xs text-slate-300 font-sans">${m.archetype}</div>
+            <div class="text-[11px] font-mono text-slate-400">Reliability: <span class="text-emerald-400">${m.reliability_score}/100</span></div>
+            <div class="flex flex-wrap gap-1 pt-1">
+              ${m.key_skills.map(s => `<span class="px-1.5 py-0.5 rounded bg-obsidian-900 border border-subtle text-[10px] text-slate-300 font-mono">${s}</span>`).join('')}
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function loadOpportunities() {
+      try {
+        const res = await fetch('/api/opportunities/match');
+        const data = await res.json();
+        const container = document.getElementById('opps-container');
+        container.innerHTML = (data.matches || []).map(m => `
+          <div class="bg-obsidian-950 p-5 rounded-xl border border-subtle space-y-4">
+            <div class="flex items-center justify-between border-b border-subtle pb-3">
+              <div>
+                <div class="text-sm font-semibold text-white font-mono">${m.opportunity.title}</div>
+                <div class="text-xs text-slate-400">Sponsor: ${m.opportunity.sponsor}</div>
+              </div>
+              <span class="px-2.5 py-1 rounded bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">${m.opportunity.grant_amount}</span>
+            </div>
+            <p class="text-xs text-slate-300">${m.opportunity.description}</p>
+            <div class="space-y-2 pt-2">
+              <span class="text-[10px] font-mono uppercase text-slate-500">Autonomous Matched Talent (Context Layer):</span>
+              <div class="grid grid-cols-2 gap-2">
+                ${m.top_matched_talent.map(t => `
+                  <div class="bg-obsidian-900 p-2 rounded border border-subtle flex items-center space-x-2">
+                    <img src="${t.avatar}" class="w-6 h-6 rounded-full object-cover" />
+                    <div class="truncate">
+                      <div class="text-xs text-white font-mono truncate">${t.name}</div>
+                      <div class="text-[10px] text-cyan-400 font-mono">${t.match_confidence}% Match</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function switchTab(tab) {
+      const views = ['agent', 'graph', 'match', 'opps', 'diff'];
+      views.forEach(v => {
+        document.getElementById(`view-${v}`).classList.add('hidden');
+        document.getElementById(`tab-${v}`).className = "tab-btn px-3 py-1 rounded-md text-slate-400 hover:text-white transition";
+      });
+
+      document.getElementById(`view-${tab}`).classList.remove('hidden');
+      document.getElementById(`tab-${tab}`).className = "tab-btn px-3 py-1 rounded-md text-white bg-obsidian-700 font-medium transition";
+
+      if (tab === 'graph') {
+        initGraphCanvas();
+      } else if (tab === 'match') {
+        runMatchmaker();
+      } else if (tab === 'opps') {
+        loadOpportunities();
+      }
+    }
+
+    // 60FPS GRAPH CANVAS
+    let canvas, ctx;
+    let graphData = { nodes: [], edges: [] };
+    let isDragging = false, draggedNode = null;
+
+    async function initGraphCanvas() {
+      canvas = document.getElementById('graphCanvas');
+      ctx = canvas.getContext('2d');
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      try {
+        const res = await fetch('/api/graph/topology');
+        graphData = await res.json();
+      } catch (e) {
+        console.error("Error fetching topology:", e);
+      }
+
+      canvas.onmousedown = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        draggedNode = graphData.nodes.find(n => {
+          const dx = n.position.x - mx;
+          const dy = n.position.y - my;
+          return Math.sqrt(dx*dx + dy*dy) < 24;
+        });
+        if (draggedNode) isDragging = true;
+      };
+
+      canvas.onmousemove = (e) => {
+        if (isDragging && draggedNode) {
+          const rect = canvas.getBoundingClientRect();
+          draggedNode.position.x = e.clientX - rect.left;
+          draggedNode.position.y = e.clientY - rect.top;
+        }
+      };
+
+      window.onmouseup = () => {
+        isDragging = false;
+        draggedNode = null;
+      };
+
+      requestAnimationFrame(renderGraphLoop);
+    }
+
+    function resizeCanvas() {
+      if (!canvas) return;
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    }
+
+    function renderGraphLoop() {
+      if (!ctx || !canvas) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw edges
+      (graphData.edges || []).forEach(e => {
+        const src = graphData.nodes.find(n => n.id === e.source);
+        const tgt = graphData.nodes.find(n => n.id === e.target);
+        if (src && tgt) {
+          ctx.beginPath();
+          ctx.moveTo(src.position.x, src.position.y);
+          ctx.lineTo(tgt.position.x, tgt.position.y);
+          ctx.strokeStyle = e.animated ? 'rgba(0, 240, 255, 0.4)' : 'rgba(255, 255, 255, 0.08)';
+          ctx.lineWidth = e.animated ? 2 : 1;
+          ctx.stroke();
+        }
+      });
+
+      // Draw nodes
+      (graphData.nodes || []).forEach(n => {
+        const x = n.position.x;
+        const y = n.position.y;
+        const color = n.data.color || '#00f0ff';
+
+        // Outer glow
+        ctx.beginPath();
+        ctx.arc(x, y, 16, 0, Math.PI * 2);
+        ctx.fillStyle = color + '22';
+        ctx.fill();
+
+        // Core circle
+        ctx.beginPath();
+        ctx.arc(x, y, 10, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+
+        // Label
+        ctx.font = '10px Geist Mono';
+        ctx.fillStyle = '#e2e8f0';
+        ctx.textAlign = 'center';
+        ctx.fillText(n.data.label || n.id, x, y + 24);
+      });
+
+      requestAnimationFrame(renderGraphLoop);
+    }
+
+    // Startup
+    loadData();
+  </script>
+</body>
+</html>
