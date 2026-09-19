@@ -6,6 +6,7 @@ a structured 4-Dimensional Synthesized User Context Profile.
 
 from typing import Dict, Any, List, Optional
 import httpx
+import asyncio
 from backend.config import settings
 
 class ContextSynthesizer:
@@ -39,6 +40,44 @@ class ContextSynthesizer:
         except Exception:
             pass
         return ""
+
+    async def generate_llm_narrative(self, profile_summary: str, query: Optional[str] = None) -> str:
+        """
+        Cognitive LLM synthesis using live Gemini 2.5 Flash.
+        Produces sharp, executive-level technical narrative.
+        """
+        if not settings.GEMINI_API_KEY:
+            return ""
+
+        import urllib.request
+        import json
+
+        def _fetch_gemini():
+            try:
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={settings.GEMINI_API_KEY}"
+                prompt = (
+                    "You are AETHER, the universal cognitive context layer for high-velocity software ecosystems. "
+                    "Analyze the following verified developer track record and produce a 2-paragraph cognitive narrative: "
+                    "evaluating their architectural caliber, execution velocity, and highest-leverage team complement. "
+                    "Be technical, precise, and authoritative (no generic praise).\n\n"
+                    f"Profile Track Record:\n{profile_summary}"
+                )
+                if query:
+                    prompt += f"\n\nDirect Question: {query}"
+
+                req_data = {"contents": [{"parts": [{"text": prompt}]}]}
+                req = urllib.request.Request(
+                    url,
+                    data=json.dumps(req_data).encode("utf-8"),
+                    headers={"Content-Type": "application/json"}
+                )
+                with urllib.request.urlopen(req, timeout=4.0) as res:
+                    data = json.loads(res.read().decode())
+                    return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            except Exception:
+                return ""
+
+        return await asyncio.to_thread(_fetch_gemini)
 
     def synthesize_user_context(self, raw_user: Dict[str, Any], live_enrichment: str = "") -> Dict[str, Any]:
         """

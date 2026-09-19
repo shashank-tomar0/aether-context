@@ -20,11 +20,25 @@ class GraphMatchmaker:
         if len(self.profiles) < squad_size:
             squad_size = len(self.profiles)
 
+        # Select top candidates per archetype to keep execution instant with 661 profiles
+        by_archetype = {}
+        for p in self.profiles:
+            arch = p.get("archetype", "Generalist")
+            by_archetype.setdefault(arch, []).append(p)
+        
+        search_pool = []
+        for arch, members in by_archetype.items():
+            sorted_m = sorted(members, key=lambda x: x.get("reliability_score", 0), reverse=True)
+            search_pool.extend(sorted_m[:3])
+
+        if len(search_pool) < squad_size:
+            search_pool = self.profiles[:20]
+
         best_combo = None
         highest_synergy = -1.0
         best_breakdown = {}
 
-        for combo in combinations(self.profiles, squad_size):
+        for combo in combinations(search_pool, squad_size):
             archetypes = [u["archetype"] for u in combo]
             unique_archetypes = len(set(archetypes))
             

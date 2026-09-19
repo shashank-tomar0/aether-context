@@ -99,9 +99,10 @@ class GraphStore:
                     })
                 self.add_edge(u_id, proj_id, "SHIPPED_PROJECT")
 
-        # Establish COMPLEMENTS edges between complementary archetypes
-        for p1 in profiles:
-            for p2 in profiles:
+        # Establish COMPLEMENTS edges for top candidates without O(N^2) blowup
+        sample_profiles = profiles[:25]
+        for p1 in sample_profiles:
+            for p2 in sample_profiles:
                 if p1["user_id"] != p2["user_id"]:
                     if p2["archetype"] in p1.get("complementary_archetypes", []):
                         self.add_edge(
@@ -111,9 +112,10 @@ class GraphStore:
                             {"affinity": 0.95}
                         )
 
-        # Synchronize directly to live Neo4j Aura instance if connected
+        # Synchronize top profiles to live Neo4j Aura instance in background thread
         if self.neo4j_connected and self.driver:
-            self._sync_to_live_neo4j(profiles)
+            import threading
+            threading.Thread(target=self._sync_to_live_neo4j, args=(profiles[:15],), daemon=True).start()
 
     def _sync_to_live_neo4j(self, profiles: List[Dict[str, Any]]):
         """Pushes user nodes, skills, archetypes, and relationship edges into Neo4j Aura."""

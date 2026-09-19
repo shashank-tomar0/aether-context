@@ -243,6 +243,7 @@ def get_all_synthesized_profiles() -> List[Dict[str, Any]]:
            s.complementary_archetypes, s.skills
     FROM users u
     JOIN synthesized_context s ON u.id = s.user_id
+    ORDER BY CASE WHEN u.id LIKE 'usr_%' THEN 0 ELSE 1 END, u.id
     """)
     rows = cursor.fetchall()
     

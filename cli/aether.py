@@ -63,12 +63,29 @@ def cmd_check(query_str: str):
     
     start_t = time.time()
     matched = None
+    # 1. Exact username
     for u in profiles:
-        if (query in u["username"].lower() or 
-            query in u["name"].lower() or 
-            any(query in part for part in u["name"].lower().split())):
+        if u["username"].lower() == query:
             matched = u
             break
+    # 2. Exact full name or word token
+    if not matched:
+        for u in profiles:
+            if u["name"].lower() == query:
+                matched = u
+                break
+            tokens = [t.lower() for t in u["name"].split() if len(t) >= 3]
+            if query in tokens:
+                matched = u
+                break
+    # 3. Substring match
+    if not matched and len(query) >= 3:
+        for u in profiles:
+            if (query in u["username"].lower() or 
+                query in u["name"].lower() or 
+                query in u["email"].lower()):
+                matched = u
+                break
             
     latency_ms = round((time.time() - start_t) * 1000, 2)
     log_audit(f"CLI check: {query_str}", matched["username"] if matched else None, bool(matched), latency_ms)
